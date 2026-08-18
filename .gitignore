@@ -1,0 +1,68 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/src/generated/prisma
+
+# env
+.env
+
+# prisma
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db*
+src/generated
+
+# typescript
+*.tsbuildinfo
+
+# Next.js 가 자동 생성하는 에이전트 규칙 파일 (이 프로젝트에서는 쓰지 않음)
+AGENTS.md
+CLAUDE.md
+
+# 작업 산출물
+.playwright-mcp/
+
+# 에디터/개인 설정
+.obsidian/
+
+# 예시 파일은 공개 (실제 .env 는 위에서 제외됨)
+!.env.example

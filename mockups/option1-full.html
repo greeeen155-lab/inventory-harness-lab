@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>재고관리 앱 — 모바일 화면 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Pretendard,sans-serif;background:#eceef1;color:#16181d;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:44px 22px 110px}
+h1{font-size:29px;letter-spacing:-.02em}
+.lede{color:#5b6272;margin-top:10px;max-width:780px;font-size:15px}
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.legend span{background:#fff;border:1px solid #d9dde3;border-radius:999px;padding:6px 13px;font-size:12.5px;color:#464d5c}
+h2.sec{margin:44px 0 6px;font-size:19px;letter-spacing:-.01em}
+h2.sec:before{content:"";display:block;width:34px;height:3px;background:#1f3a8a;border-radius:9px;margin-bottom:11px}
+p.secd{color:#5b6272;font-size:14px;max-width:760px;margin-bottom:20px}
+.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.sw{display:flex;flex-direction:column;align-items:center;width:288px}
+.cap{font-size:12px;color:#78808f;margin-top:9px;text-align:center;line-height:1.45}
+.cap b{color:#2b3242;display:block;font-size:12.5px}
+
+.phone{width:288px;background:#fff;border:9px solid #23262e;border-radius:34px;overflow:hidden;box-shadow:0 12px 28px rgba(20,24,35,.16)}
+.sb{background:#23262e;color:#fff;font-size:10px;padding:3px 15px 6px;display:flex;justify-content:space-between}
+.scr{font-size:12.5px;min-height:520px;display:flex;flex-direction:column;position:relative}
+.body{flex:1}
+
+/* 공통 토큰 */
+:root{--ink:#111827;--acc:#1f3a8a;--sub:#8b93a3;--line:#eef1f6;--soft:#f4f6fa;--warn:#c2410c;--amber:#b45309;--ok:#0f7b45}
+.nav{padding:15px 16px 11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.nav b{font-size:16px;letter-spacing:-.01em}
+.nav .r{font-size:12px;color:var(--sub)}
+.back{font-size:14.5px;font-weight:700}
+.tabs{display:flex;border-top:1px solid #e7eaf0;background:#fff}
+.tabs div{flex:1;text-align:center;padding:8px 0 12px;font-size:10.5px;color:var(--sub)}
+.tabs div.on{color:var(--acc);font-weight:700}
+.tabs .ic{display:block;font-size:15px;margin-bottom:1px}
+.muted{color:var(--sub)}
+.cta{margin:14px 16px;background:var(--acc);color:#fff;text-align:center;border-radius:13px;padding:15px;font-weight:700;font-size:14.5px}
+.cta.ghost{background:var(--soft);color:var(--acc)}
+.sticky{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding-top:2px}
+
+/* 홈 */
+.todo{margin:14px 14px 0;border:1.5px solid var(--acc);border-radius:15px;padding:13px 14px}
+.todo h4{font-size:11.5px;color:var(--acc);letter-spacing:.07em;margin-bottom:9px;font-weight:800}
+.trow{display:flex;justify-content:space-between;padding:7px 0;font-size:12.5px;border-top:1px solid var(--line)}
+.trow:first-of-type{border-top:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 14px 6px}
+.act{background:var(--soft);border:1px solid #e2e7f0;border-radius:15px;padding:17px 8px;text-align:center}
+.act .ic{font-size:20px}
+.act .lb{font-size:12.5px;font-weight:700;margin-top:5px}
+.search{margin:6px 14px 12px;background:#f0f2f6;border-radius:12px;padding:11px 13px;color:#98a0b0;font-size:12.5px}
+
+/* 리스트 */
+.lrow{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line)}
+.lrow .nm{font-size:13px;font-weight:600}
+.lrow .sub{font-size:11px;color:var(--sub);margin-top:2px}
+.lrow .qt{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.tag{font-size:10px;border-radius:999px;padding:2px 8px;font-weight:800;white-space:nowrap}
+.t-soon{background:#fff5e6;color:var(--amber)}
+.t-exp{background:#fdeceb;color:#b91c1c}
+.t-ok{background:#eef7f1;color:var(--ok)}
+.t-mv{background:#eef2fb;color:var(--acc)}
+.filters{display:flex;gap:6px;padding:11px 16px;border-bottom:1px solid var(--line);overflow:hidden}
+.filters span{font-size:11.5px;border:1px solid #dde2ea;border-radius:999px;padding:5px 11px;color:#5b6272;white-space:nowrap}
+.filters span.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+
+/* 숫자 입력 */
+.chip{background:#f0f2f6;border-radius:12px;padding:11px 13px;font-size:13px;font-weight:700;margin:12px 16px 0}
+.field{margin:12px 16px 4px;border:2px solid var(--acc);border-radius:12px;padding:12px 13px;font-size:20px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums}
+.hint{margin:0 16px;font-size:11.5px;color:#5b6272}
+.chips{display:flex;gap:6px;padding:9px 16px 0;flex-wrap:wrap}
+.chips span{background:#eef2fb;color:var(--acc);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700}
+.kbd{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:11px 16px 8px}
+.kbd div{background:#f2f4f8;border-radius:10px;text-align:center;padding:12px 0;font-size:17px;font-weight:700}
+.kbd div.fn{font-size:12.5px;color:var(--acc);font-weight:800}
+
+/* 다건 입력 */
+.mrow{padding:11px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mrow .l .nm{font-size:13px;font-weight:600}
+.mrow .l .sub{font-size:11px;color:var(--sub);margin-top:2px}
+.inputbox{border:2px solid var(--acc);border-radius:10px;padding:8px 12px;min-width:64px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.inputbox.empty{border-color:#dde2ea;color:#c3c9d4}
+.sum{padding:11px 16px;background:var(--soft);display:flex;justify-content:space-between;font-size:12.5px;font-weight:700}
+
+/* 역산 문장 */
+.sent{margin:14px 16px;background:#f2faf5;border:1px solid #cbe7d7;border-radius:14px;padding:14px;font-size:13px;line-height:1.75}
+.sent b{color:var(--ok);font-weight:800}
+.bars{padding:4px 16px 8px}
+.bar{margin-top:10px}
+.bl{display:flex;justify-content:space-between;font-size:11.5px}
+.track{height:7px;background:#eef1f5;border-radius:99px;margin-top:4px;overflow:hidden}
+.fill{height:100%;background:var(--ok);border-radius:99px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:13px 16px 4px}
+.kpi{background:var(--soft);border-radius:12px;padding:10px 4px;text-align:center}
+.kpi .k{font-size:10px;color:var(--sub)}
+.kpi .v{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+
+/* 상세 */
+.hero{padding:16px 16px 4px}
+.hero .q{font-size:12px;color:var(--sub)}
+.hero .n{font-size:40px;font-weight:800;letter-spacing:-.035em;color:var(--acc);line-height:1.1}
+.hero .u{font-size:13px;color:var(--sub);font-weight:600;margin-left:4px}
+.secl{padding:13px 16px 5px;font-size:11px;color:var(--sub);letter-spacing:.05em;font-weight:700}
+.dim{background:#f8f9fb;color:var(--sub)}
+
+/* 데스크톱 */
+.desk{width:100%;max-width:720px;background:#fff;border:1px solid #cfd4dc;border-radius:12px;overflow:hidden;box-shadow:0 12px 28px rgba(20,24,35,.12)}
+.dbar{background:#e9ecf1;padding:7px 12px;display:flex;gap:6px;border-bottom:1px solid #d8dde5}
+.dot{width:9px;height:9px;border-radius:50%;background:#cbd1da}
+.dwrap{display:flex}
+.dside{width:180px;border-right:1px solid var(--line);padding:14px 0}
+.dside div{padding:9px 18px;font-size:12.5px;color:#5b6272}
+.dside div.on{background:#eef2fb;color:var(--acc);font-weight:800;border-right:2px solid var(--acc)}
+.dmain{flex:1;min-width:0}
+.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtable th{text-align:left;font-size:11px;color:#6b7385;padding:10px 16px;border-bottom:1px solid var(--line)}
+.dtable td{padding:10px 16px;border-bottom:1px solid #f4f6f9}
+.dtable .num{text-align:right;font-variant-numeric:tabular-nums}
+
+.note{margin-top:36px;background:#fff8e8;border:1px solid #f0dfb8;border-radius:15px;padding:20px 22px;font-size:14px}
+.note b{display:block;margin-bottom:8px}
+.note li{margin-left:18px;margin-top:6px}
+@media(max-width:640px){.wrap{padding:28px 14px 80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>재고관리 앱 — 모바일 화면 시안</h1>
+<p class="lede">
+시안 A(단일 컬럼 + 하단 탭)를 전 화면에 적용했습니다. 표가 필요했던 두 화면(풀필먼트 일일 반영·팝업 정산)도
+<b>폰용 세로 리스트</b>로 다시 그렸고, 같은 화면이 PC에서는 넓게 펼쳐집니다(맨 아래).
+테스트 데이터는 강아지 간식입니다.
+</p>
+<div class="legend">
+  <span>기준: 폰 세로 · 한 손 조작</span>
+  <span>P1 물류창고 — 하루 여러 번</span>
+  <span>P2 영업 — 검색 · 팝업 정산</span>
+</div>
+
+<h2 class="sec">1. 매일 쓰는 화면</h2>
+<p class="secd">홈은 대시보드가 아니라 <b>다음 동작으로 밀어 넣는 발사대</b>다. 오늘 할 일을 다 끝내면 카드가 사라진다.</p>
+<div class="row">
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><b>재고</b><span class="r">이현</span></div>
+      <div class="todo">
+        <h4>오늘 할 일</h4>
+        <div class="trow"><span>풀필먼트 반영</span><span class="muted">A ✅ &nbsp;B ✅ &nbsp;C ⬜</span></div>
+        <div class="trow"><span>미확인 배송</span><span style="color:var(--warn);font-weight:700">3건 ›</span></div>
+        <div class="trow"><span>유통기한 만료</span><span style="color:var(--warn);font-weight:700">2건 ›</span></div>
+      </div>
+      <div class="grid">
+        <div class="act"><div class="ic">📥</div><div class="lb">입고</div></div>
+        <div class="act"><div class="ic">📤</div><div class="lb">출고</div></div>
+        <div class="act"><div class="ic">🚚</div><div class="lb">풀필먼트 발송</div></div>
+        <div class="act"><div class="ic">🎪</div><div class="lb">팝업</div></div>
+      </div>
+      <div class="search">🔍 상품 검색…</div>
+      <div class="secl">진행 중</div>
+      <div class="lrow"><div><div class="nm">성수 팝업</div><div class="sub">10.10–10.12 · 반출 160</div></div><span class="tag t-mv">진행</span></div>
+    </div>
+    <div class="tabs"><div class="on"><span class="ic">◉</span>홈</div><div><span class="ic">▤</span>재고</div><div><span class="ic">↺</span>이력</div><div><span class="ic">☰</span>설정</div></div>
+  </div></div><div class="cap"><b>홈</b>할 일 카드(E2) + 큰 버튼 4개</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 입고</span><span class="r">오늘 12건</span></div>
+      <div class="chip">🦴 강아지 치즈 간식 200g</div>
+      <div class="field">2 7 0 3 3 1</div>
+      <div class="hint">→ <b>2027-03-31</b> · 1년 7개월 남음</div>
+      <div class="chips"><span>최근 270331</span><span>261130</span><span>2703 (말일)</span></div>
+      <div class="kbd">
+        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
+        <div>7</div><div>8</div><div>9</div><div class="fn">＋기한</div><div>0</div><div>⌫</div>
+      </div>
+      <div class="lrow" style="border-top:1px solid var(--line)"><div><div class="nm">2026-11-30</div><div class="sub">방금 입력</div></div><span class="qt">15</span></div>
+    </div>
+    <div class="sticky"><div class="cta">저장하고 다음 상품</div></div>
+  </div></div><div class="cap"><b>입고 (S1)</b>유통기한 6자리 입력(E1) · 한 상품에 기한 여러 개</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 출고</span><span class="r">사유 판매 ⌄</span></div>
+      <div class="chip">🦴 강아지 우유껌 M</div>
+      <div class="secl">출고 수량</div>
+      <div class="field" style="letter-spacing:0">20</div>
+      <div class="secl">자동 선택된 재고 · 유통기한 빠른 순</div>
+      <div class="lrow"><div><div class="nm">2026-11-30</div><div class="sub">보유 15 · 23일 남음</div></div><div style="text-align:right"><span class="qt">15</span><br><span class="tag t-soon">임박</span></div></div>
+      <div class="lrow"><div><div class="nm">2027-03-31</div><div class="sub">보유 50</div></div><span class="qt">5</span></div>
+      <div style="padding:11px 16px;font-size:11.5px;color:var(--sub)">임박한 재고부터 자동으로 나갑니다. <span style="color:var(--acc);font-weight:700">변경</span></div>
+    </div>
+    <div class="sticky"><div class="cta">20개 출고</div></div>
+  </div></div><div class="cap"><b>출고 (S2)</b>FEFO 자동 배분 — 계산은 앱이 한다</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 강아지 치즈 간식 200g</span></div>
+      <div class="hero"><div class="q">지금 출고 가능</div><div class="n">340<span class="u">개</span></div></div>
+      <div class="secl">거점별</div>
+      <div class="lrow"><div><div class="nm">자사창고</div></div><span class="qt">120</span></div>
+      <div class="lrow"><div><div class="nm">풀필먼트 A</div><div class="sub">오늘 반영</div></div><span class="qt">150</span></div>
+      <div class="lrow"><div><div class="nm">풀필먼트 B</div><div class="sub" style="color:var(--amber)">2일 전 반영</div></div><span class="qt">70</span></div>
+      <div class="secl">가용에서 제외</div>
+      <div class="lrow dim"><div><div class="nm">배송 중</div><div class="sub">풀필먼트 C · 4일 경과</div></div><span class="qt">40</span></div>
+      <div class="lrow dim"><div><div class="nm">팝업 보유</div><div class="sub">성수 팝업</div></div><span class="qt">60</span></div>
+      <div class="secl">유통기한</div>
+      <div class="lrow"><div><div class="nm">2026-11-30</div><div class="sub">23일 남음</div></div><div style="text-align:right"><span class="qt">30</span><br><span class="tag t-soon">임박</span></div></div>
+      <div class="lrow"><div><div class="nm">2027-03-31</div></div><span class="qt">310</span></div>
+    </div>
+    <div class="sticky"><div class="cta ghost">이 상품 출고</div></div>
+  </div></div><div class="cap"><b>상품 상세 (S10)</b>가용 340이 대표 숫자 · 배송중·팝업은 따로</div></div>
+
+</div>
+
+<h2 class="sec">2. 표를 안 쓰고 다건 입력하기</h2>
+<p class="secd">매일 3번 반복되는 풀필먼트 반영과, 10~15종을 한 번에 세는 팝업 정산. 폰에서는 <b>세로 리스트 + 수량칸</b>으로, 하단 저장 버튼은 고정된다.</p>
+<div class="row">
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 풀필먼트 A</span><span class="r">8/18 어제분</span></div>
+      <div class="filters"><span class="on">최근 움직임</span><span>전체 24</span><span>입력한 것만</span></div>
+      <div class="mrow"><div class="l"><div class="nm">강아지 치즈 간식 200g</div><div class="sub">현재 150 → 143</div></div><div class="inputbox">7</div></div>
+      <div class="mrow"><div class="l"><div class="nm">강아지 우유껌 M</div><div class="sub">현재 64</div></div><div class="inputbox empty">0</div></div>
+      <div class="mrow"><div class="l"><div class="nm">오리목뼈 껌 5p</div><div class="sub">현재 18 → 15</div></div><div class="inputbox">3</div></div>
+      <div class="mrow"><div class="l"><div class="nm">닭가슴살 저키 100g</div><div class="sub">현재 42</div></div><div class="inputbox empty">0</div></div>
+      <div class="mrow"><div class="l"><div class="nm">고구마 말랭이 150g</div><div class="sub">현재 30 → 28</div></div><div class="inputbox">2</div></div>
+      <div class="sum"><span>입력 3건</span><span>총 12개 차감</span></div>
+      <div style="padding:10px 16px;font-size:11.5px;color:var(--sub)">유통기한이 빠른 재고에서 자동으로 차감됩니다.</div>
+    </div>
+    <div class="sticky"><div class="cta">저장 · 오늘 반영 완료</div></div>
+  </div></div><div class="cap"><b>풀필먼트 일일 반영 (S5)</b>상품 검색 없이 목록에서 수량칸만 탭</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 성수 팝업 정산</span><span class="r">1/2</span></div>
+      <div style="padding:11px 16px;font-size:12px;color:#3c4658;background:var(--soft)">돌아온 물건을 세어 입력하세요. 판매량은 앱이 계산합니다.</div>
+      <div class="mrow"><div class="l"><div class="nm">강아지 치즈 간식 200g</div><div class="sub">반출 50 · 2027-03-31</div></div><div class="inputbox">5</div></div>
+      <div class="mrow"><div class="l"><div class="nm">강아지 우유껌 M</div><div class="sub">반출 40 · 2026-11-30</div></div><div class="inputbox">8</div></div>
+      <div class="mrow"><div class="l"><div class="nm">오리목뼈 껌 5p</div><div class="sub">반출 40 · 2027-01-20</div></div><div class="inputbox">19</div></div>
+      <div class="mrow"><div class="l"><div class="nm">닭가슴살 저키 100g</div><div class="sub">반출 30 · 2027-06-30</div></div><div class="inputbox">10</div></div>
+      <div class="sum"><span>누적 반출 160</span><span>반입 42</span></div>
+      <div style="padding:11px 16px"><div style="font-size:12px;color:var(--sub);margin-bottom:6px">이 중 시식·증정으로 나간 수량</div><div class="inputbox" style="display:block;text-align:left">5</div></div>
+    </div>
+    <div class="sticky"><div class="cta">다음 · 계산 확인</div></div>
+  </div></div><div class="cap"><b>팝업 정산 ① (S9)</b>남은 실물만 입력 · 시식은 따로</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 확인</span><span class="r">2/2</span></div>
+      <div class="sent">
+        160개를 가져갔고 <b>42개</b>가 돌아왔습니다.<br>
+        차감 118개 중 시식·증정 <b>5개</b>를 빼고<br>
+        <b>113개를 판매로 기록</b>합니다.<br>
+        <span style="color:#5b6272;font-size:12px">남은 42개는 자사창고로 돌아갑니다.</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">반출</div><div class="v">160</div></div>
+        <div class="kpi"><div class="k">판매</div><div class="v">113</div></div>
+        <div class="kpi"><div class="k">시식</div><div class="v">5</div></div>
+        <div class="kpi"><div class="k">반입</div><div class="v">42</div></div>
+      </div>
+      <div class="secl">상품별 소진율</div>
+      <div class="bars">
+        <div class="bar"><div class="bl"><span>강아지 치즈 간식</span><span>45/50 · 90%</span></div><div class="track"><div class="fill" style="width:90%"></div></div></div>
+        <div class="bar"><div class="bl"><span>강아지 우유껌 M</span><span>32/40 · 80%</span></div><div class="track"><div class="fill" style="width:80%"></div></div></div>
+        <div class="bar"><div class="bl"><span>오리목뼈 껌 5p</span><span>21/40 · 53%</span></div><div class="track"><div class="fill" style="width:53%"></div></div></div>
+        <div class="bar"><div class="bl"><span>닭가슴살 저키</span><span>20/30 · 67%</span></div><div class="track"><div class="fill" style="width:67%"></div></div></div>
+      </div>
+    </div>
+    <div class="sticky"><div class="cta">정산 확정</div></div>
+  </div></div><div class="cap"><b>팝업 정산 ② (E3)</b>역산 결과를 문장으로 확인시킨다</div></div>
+
+</div>
+
+<h2 class="sec">3. 찾고 · 확인하는 화면</h2>
+<p class="secd">임박·만료는 색만이 아니라 <b>글자와 배지</b>로도 구분한다(접근성). 배송 중은 7일부터 경고한다.</p>
+<div class="row">
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><b>재고</b><span class="r">24 SKU</span></div>
+      <div class="search">🔍 강아지</div>
+      <div class="filters"><span class="on">전체</span><span>임박 3</span><span>만료 2</span><span>자사창고</span><span>풀필A</span></div>
+      <div class="lrow"><div><div class="nm">강아지 치즈 간식 200g</div><div class="sub">자사창고 120 · 풀필 220</div></div><div style="text-align:right"><span class="qt">340</span><br><span class="tag t-soon">임박 30</span></div></div>
+      <div class="lrow"><div><div class="nm">강아지 우유껌 M</div><div class="sub">자사창고 64 · 풀필 90</div></div><span class="qt">154</span></div>
+      <div class="lrow"><div><div class="nm">오리목뼈 껌 5p</div><div class="sub">자사창고 18</div></div><div style="text-align:right"><span class="qt">18</span><br><span class="tag t-exp">만료 6</span></div></div>
+      <div class="lrow"><div><div class="nm">닭가슴살 저키 100g</div><div class="sub">풀필A 42</div></div><span class="qt">42</span></div>
+      <div class="lrow"><div><div class="nm">고구마 말랭이 150g</div><div class="sub">자사창고 30 · 배송중 20</div></div><span class="qt">30</span></div>
+    </div>
+    <div class="tabs"><div><span class="ic">◉</span>홈</div><div class="on"><span class="ic">▤</span>재고</div><div><span class="ic">↺</span>이력</div><div><span class="ic">☰</span>설정</div></div>
+  </div></div><div class="cap"><b>재고 목록</b>검색 + 상태 필터 · 대표 숫자는 가용</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><span class="back">‹ 배송 중</span><span class="r">3건</span></div>
+      <div class="lrow" style="background:#fdf6f3"><div><div class="nm">풀필먼트 C</div><div class="sub">8/10 발송 · <b style="color:var(--warn)">8일 경과</b></div></div><span class="tag t-exp">지연</span></div>
+      <div class="lrow"><div><div class="nm">풀필먼트 A</div><div class="sub">8/14 발송 · 4일 경과</div></div><span class="tag t-mv">정상</span></div>
+      <div class="lrow"><div><div class="nm">풀필먼트 B</div><div class="sub">8/16 발송 · 2일 경과</div></div><span class="tag t-mv">정상</span></div>
+      <div class="secl">풀필먼트 C · 8/10 발송분</div>
+      <div class="lrow"><div><div class="nm">강아지 치즈 간식 200g</div><div class="sub">2027-03-31</div></div><span class="qt">30</span></div>
+      <div class="lrow"><div><div class="nm">고구마 말랭이 150g</div><div class="sub">2027-02-28</div></div><span class="qt">20</span></div>
+      <div style="padding:11px 16px;font-size:11.5px;color:var(--sub)">문자에 적힌 수량이 다르면 수정할 수 있습니다.</div>
+    </div>
+    <div class="sticky"><div class="cta">전량 도착 확인</div></div>
+  </div></div><div class="cap"><b>도착 확인 (S4)</b>3~5일 정상 · 7일부터 지연 표시</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="nav"><b>이력</b><span class="r">되돌리기 가능</span></div>
+      <div class="filters"><span class="on">전체</span><span>입고</span><span>출고</span><span>이동</span><span>조정</span></div>
+      <div class="lrow"><div><div class="nm">출고 · 판매 20</div><div class="sub">강아지 우유껌 M · 자사창고 · 이현 · 방금</div></div><span style="color:var(--acc);font-weight:700;font-size:11.5px">취소</span></div>
+      <div class="lrow"><div><div class="nm">입고 45</div><div class="sub">강아지 치즈 간식 · 2027-03-31 · 이현 · 09:12</div></div><span class="muted" style="font-size:11.5px">수정</span></div>
+      <div class="lrow"><div><div class="nm">이동 30</div><div class="sub">자사창고 → 배송 중 · 풀필C · 8/10</div></div><span class="tag t-mv">이동</span></div>
+      <div class="lrow"><div><div class="nm">조정 −2</div><div class="sub">대조 차이 · 풀필먼트 B · 민수 · 어제</div></div><span class="tag t-soon">조정</span></div>
+      <div class="lrow"><div><div class="nm">폐기 6</div><div class="sub">오리목뼈 껌 · 2026-08-10 만료 · 이현</div></div><span class="tag t-exp">폐기</span></div>
+    </div>
+    <div class="tabs"><div><span class="ic">◉</span>홈</div><div><span class="ic">▤</span>재고</div><div class="on"><span class="ic">↺</span>이력</div><div><span class="ic">☰</span>설정</div></div>
+  </div></div><div class="cap"><b>이력 (F10)</b>누가·언제 · 최근 건은 여기서 취소</div></div>
+
+</div>
+
+<h2 class="sec">4. 같은 화면, PC에서</h2>
+<p class="secd">별도 화면을 만들지 않는다. 폭이 넓어지면 세로 리스트가 <b>가로 한 줄</b>로 펴지고, 왼쪽에 메뉴가 나온다. 데이터도 코드도 같다.</p>
+<div class="desk">
+  <div class="dbar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+  <div class="dwrap">
+    <div class="dside">
+      <div>홈</div><div class="on">풀필먼트 반영</div><div>재고</div><div>팝업</div><div>이력</div><div>설정</div>
+    </div>
+    <div class="dmain">
+      <div class="nav"><b>풀필먼트 A · 어제 출고 반영</b><span class="r">8/18</span></div>
+      <table class="dtable">
+        <tr><th>상품</th><th class="num">현재</th><th class="num">출고 입력</th><th>FEFO 자동 차감</th></tr>
+        <tr><td>강아지 치즈 간식 200g</td><td class="num">150</td><td class="num"><span class="inputbox" style="padding:4px 9px;font-size:13px">7</span></td><td class="muted">2026-11-30에서 7</td></tr>
+        <tr><td>강아지 우유껌 M</td><td class="num">64</td><td class="num"><span class="inputbox empty" style="padding:4px 9px;font-size:13px">0</span></td><td></td></tr>
+        <tr><td>오리목뼈 껌 5p</td><td class="num">18</td><td class="num"><span class="inputbox" style="padding:4px 9px;font-size:13px">3</span></td><td class="muted">2026-09-10에서 3</td></tr>
+        <tr><td>닭가슴살 저키 100g</td><td class="num">42</td><td class="num"><span class="inputbox empty" style="padding:4px 9px;font-size:13px">0</span></td><td></td></tr>
+        <tr><td>고구마 말랭이 150g</td><td class="num">30</td><td class="num"><span class="inputbox" style="padding:4px 9px;font-size:13px">2</span></td><td class="muted">2027-02-28에서 2</td></tr>
+      </table>
+      <div class="sum"><span>입력 3건 · 총 12개 차감</span><span style="color:var(--acc)">Tab으로 다음 칸 · Enter 저장</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>이 시안에서 지키고 있는 것</b>
+  <li><b>3탭 이내</b> — 홈 → 입고 → 저장. 확인창 없음(P1, T3)</li>
+  <li><b>표 없이 다건 입력</b> — 상품을 검색하지 않고 목록에서 수량칸만 탭 (P3)</li>
+  <li><b>FEFO는 보이지 않게</b> — 사용자는 총 수량만 넣고, 로트 배분은 앱이 (P4)</li>
+  <li><b>가용이 대표 숫자</b> — 배송 중·팝업 보유는 회색으로 분리 (P5)</li>
+  <li><b>거점마다 신뢰도</b> — 풀필먼트에 반영일 표시 (P6)</li>
+  <li><b>역산은 문장으로</b> — 팝업 정산 확정 전 사람 말로 확인 (P8)</li>
+  <li><b>색만으로 구분하지 않음</b> — 임박/만료/지연은 배지 글자로도 표시</li>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>재고관리 앱 — 모바일 시안 3종</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Pretendard,sans-serif;background:#eceef1;color:#16181d;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:44px 22px 110px}
+h1{font-size:29px;letter-spacing:-.02em}
+.lede{color:#5b6272;margin-top:10px;max-width:790px;font-size:15px}
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.legend span{background:#fff;border:1px solid #d9dde3;border-radius:999px;padding:6px 13px;font-size:12.5px;color:#464d5c}
+section.plan{background:#fff;border-radius:18px;padding:32px;margin-top:32px;border:1px solid #dfe3e9}
+.phead{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;border-bottom:1px solid #e8ebf0;padding-bottom:20px;margin-bottom:24px}
+.badge{font-size:12px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:9px;color:#fff;white-space:nowrap}
+.phead h2{font-size:21px;letter-spacing:-.01em}
+.phead p{color:#5b6272;font-size:14px;margin-top:6px;max-width:680px}
+.tagline{font-size:12.5px;color:#8b93a3;margin-top:7px}
+.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.sw{display:flex;flex-direction:column;align-items:center;width:280px}
+.cap{font-size:12px;color:#78808f;margin-top:9px;text-align:center;line-height:1.45}
+.cap b{color:#2b3242;display:block;font-size:12.5px}
+.pros{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:24px}
+.pros div{border-radius:12px;padding:15px 17px;font-size:13.5px}
+.good{background:#f1f8f3;border:1px solid #cfe6d6}
+.bad{background:#fdf4f2;border:1px solid #f0d5cd}
+.pros b{display:block;margin-bottom:6px;font-size:12px;letter-spacing:.06em}
+.pros li{margin-left:16px;margin-top:4px}
+.who{margin-top:15px;font-size:13.5px;background:#f5f6f8;border-radius:12px;padding:13px 17px;border:1px solid #e5e8ee}
+
+.phone{width:280px;background:#fff;border:9px solid #23262e;border-radius:34px;overflow:hidden;box-shadow:0 12px 28px rgba(20,24,35,.16)}
+.sb{background:#23262e;color:#fff;font-size:10px;padding:3px 15px 6px;display:flex;justify-content:space-between}
+.scr{font-size:12.5px;height:510px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.body{flex:1;overflow:hidden}
+.muted{color:#8b93a3}
+.tag{font-size:9.5px;border-radius:999px;padding:2px 7px;font-weight:800;white-space:nowrap}
+.t-soon{background:#fff5e6;color:#b45309}
+.t-exp{background:#fdeceb;color:#b91c1c}
+.t-mv{background:#eef2fb;color:#1f3a8a}
+.t-ok{background:#eef7f1;color:#0f7b45}
+.inputbox{border:2px solid currentColor;border-radius:10px;padding:7px 11px;min-width:60px;text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.empty{border-color:#dde2ea!important;color:#c3c9d4}
+
+/* ══ 시안 1 : 발사대 ══ */
+.S1{--acc:#1f3a8a;--soft:#f4f6fa;--line:#eef1f6}
+.S1 .nav{padding:15px 16px 11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.S1 .nav b{font-size:16px}
+.S1 .todo{margin:13px 14px 0;border:1.5px solid var(--acc);border-radius:15px;padding:12px 14px}
+.S1 .todo h4{font-size:11px;color:var(--acc);letter-spacing:.07em;margin-bottom:8px;font-weight:800}
+.S1 .trow{display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px;border-top:1px solid var(--line)}
+.S1 .trow:first-of-type{border-top:0}
+.S1 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:13px 14px 6px}
+.S1 .act{background:var(--soft);border:1px solid #e2e7f0;border-radius:15px;padding:16px 8px;text-align:center}
+.S1 .act .ic{font-size:19px}
+.S1 .act .lb{font-size:12.5px;font-weight:700;margin-top:4px}
+.S1 .search{margin:6px 14px 12px;background:#f0f2f6;border-radius:12px;padding:10px 13px;color:#98a0b0;font-size:12.5px}
+.S1 .tabs{display:flex;border-top:1px solid #e7eaf0}
+.S1 .tabs div{flex:1;text-align:center;padding:8px 0 12px;font-size:10.5px;color:#8b93a3}
+.S1 .tabs div.on{color:var(--acc);font-weight:800}
+.S1 .tabs .ic{display:block;font-size:15px}
+.S1 .lrow{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line)}
+.S1 .nm{font-size:13px;font-weight:600}
+.S1 .sub{font-size:11px;color:#8b93a3;margin-top:2px}
+.S1 .qt{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.S1 .cta{margin:13px 16px;background:var(--acc);color:#fff;text-align:center;border-radius:13px;padding:14px;font-weight:800;font-size:14px}
+.S1 .field{margin:12px 16px 4px;border:2px solid var(--acc);border-radius:12px;padding:11px 13px;font-size:19px;font-weight:800;letter-spacing:.14em}
+.S1 .hint{margin:0 16px;font-size:11.5px;color:#5b6272}
+.S1 .kbd{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 16px 6px}
+.S1 .kbd div{background:#f2f4f8;border-radius:10px;text-align:center;padding:10px 0;font-size:16px;font-weight:700}
+.S1 .chip{background:#f0f2f6;border-radius:12px;padding:10px 13px;font-size:13px;font-weight:700;margin:12px 16px 0}
+.S1 .mrow{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.S1 .sum{padding:10px 16px;background:var(--soft);display:flex;justify-content:space-between;font-size:12.5px;font-weight:700}
+.S1 .inputbox{color:var(--acc)}
+
+/* ══ 시안 2 : 검색대 ══ */
+.S2{--acc:#0b7285;--line:#e9edf1}
+.S2 .top{background:var(--acc);padding:13px 15px 14px;color:#fff}
+.S2 .top .t{font-size:12px;opacity:.85}
+.S2 .sfield{background:rgba(255,255,255,.16);border-radius:11px;padding:10px 12px;margin-top:9px;font-size:13px;color:#dff1f4}
+.S2 .banner{background:#fff6ea;border-bottom:1px solid #f2e2cd;padding:9px 15px;font-size:11.5px;color:#8a5a12;display:flex;justify-content:space-between;align-items:center}
+.S2 .seg{display:flex;gap:6px;padding:10px 15px;border-bottom:1px solid var(--line);overflow:hidden}
+.S2 .seg span{font-size:11.5px;border:1px solid #dde3e8;border-radius:8px;padding:5px 10px;color:#4d5866;white-space:nowrap}
+.S2 .seg span.on{background:#e6f3f5;color:var(--acc);border-color:#b6dbe1;font-weight:800}
+.S2 .item{padding:11px 15px;border-bottom:1px solid #f2f5f7;display:flex;justify-content:space-between;align-items:flex-start}
+.S2 .item .nm{font-size:13px;font-weight:700}
+.S2 .item .meta{font-size:11px;color:#7c8794;margin-top:3px}
+.S2 .item .rt{text-align:right}
+.S2 .item .big{font-size:17px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.S2 .item .u{font-size:10px;color:#7c8794;font-weight:600}
+.S2 .fab{position:absolute;right:15px;bottom:16px;background:var(--acc);color:#fff;border-radius:16px;padding:14px 17px;font-size:14px;font-weight:800;box-shadow:0 8px 18px rgba(11,114,133,.35)}
+.S2 .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.14);padding:8px 0 14px}
+.S2 .handle{width:36px;height:4px;background:#dde3e8;border-radius:9px;margin:4px auto 10px}
+.S2 .srow{padding:12px 18px;font-size:13.5px;font-weight:700;display:flex;gap:11px;align-items:center;border-bottom:1px solid #f4f7f8}
+.S2 .srow span.ic{font-size:16px}
+.S2 .hdr2{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.S2 .hdr2 b{font-size:14.5px}
+.S2 .mrow{padding:10px 15px;border-bottom:1px solid #f2f5f7;display:flex;justify-content:space-between;align-items:center}
+.S2 .inputbox{color:var(--acc)}
+.S2 .savebar{position:absolute;left:0;right:0;bottom:0;background:var(--acc);color:#fff;padding:14px;text-align:center;font-weight:800;font-size:14px}
+.S2 .kv{display:flex;justify-content:space-between;padding:9px 15px;font-size:12.5px;border-bottom:1px solid #f2f5f7}
+
+/* ══ 시안 3 : 거점 스와이프 ══ */
+.S3{--acc:#4c1d95;--line:#eeeaf5}
+.S3 .pager{display:flex;gap:6px;padding:12px 14px 8px;overflow:hidden}
+.S3 .pg{flex:0 0 auto;font-size:11.5px;padding:6px 11px;border-radius:999px;background:#f3f0f9;color:#5b5570;font-weight:700}
+.S3 .pg.on{background:var(--acc);color:#fff}
+.S3 .card{margin:4px 14px 0;border-radius:18px;background:linear-gradient(160deg,#5b21b6,#3b1078);color:#fff;padding:16px 17px;box-shadow:0 10px 22px rgba(76,29,149,.25)}
+.S3 .card .lb{font-size:11.5px;opacity:.8}
+.S3 .card .n{font-size:33px;font-weight:800;letter-spacing:-.03em;margin-top:2px}
+.S3 .card .sub{font-size:11.5px;opacity:.85;margin-top:5px}
+.S3 .card .pillrow{display:flex;gap:6px;margin-top:11px}
+.S3 .card .pill{background:rgba(255,255,255,.18);border-radius:999px;padding:4px 9px;font-size:10.5px;font-weight:700}
+.S3 .dots{display:flex;gap:5px;justify-content:center;padding:10px 0 4px}
+.S3 .dots i{width:6px;height:6px;border-radius:50%;background:#d8d2e6}
+.S3 .dots i.on{background:var(--acc);width:16px;border-radius:9px}
+.S3 .sect{padding:8px 16px 5px;font-size:11px;color:#8b859c;letter-spacing:.05em;font-weight:800}
+.S3 .lot{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.S3 .lot .nm{font-size:12.5px;font-weight:600}
+.S3 .lot .sub{font-size:10.5px;color:#8b859c;margin-top:2px}
+.S3 .lot .qt{font-size:15px;font-weight:800}
+.S3 .ctxbar{display:flex;gap:7px;padding:11px 14px;border-top:1px solid var(--line);background:#faf9fc}
+.S3 .ctxbar div{flex:1;text-align:center;border-radius:12px;padding:11px 0;font-size:12px;font-weight:800}
+.S3 .b1{background:var(--acc);color:#fff}
+.S3 .b2{background:#f0ecf8;color:var(--acc)}
+.S3 .sent{margin:12px 16px;background:#f7f4fd;border:1px solid #ded4f2;border-radius:14px;padding:13px;font-size:12.5px;line-height:1.7}
+.S3 .sent b{color:var(--acc)}
+.S3 .bar{margin:9px 16px 0}
+.S3 .bl{display:flex;justify-content:space-between;font-size:11.5px}
+.S3 .track{height:7px;background:#f0ecf8;border-radius:99px;margin-top:4px;overflow:hidden}
+.S3 .fill{height:100%;background:var(--acc);border-radius:99px}
+.S3 .mrow{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.S3 .inputbox{color:var(--acc)}
+
+table.cmp{width:100%;border-collapse:collapse;margin-top:32px;background:#fff;border-radius:14px;overflow:hidden;font-size:13.5px;border:1px solid #dfe3e9}
+table.cmp th,table.cmp td{padding:11px 14px;border-bottom:1px solid #eef1f5;text-align:left;vertical-align:top}
+table.cmp th{background:#f6f7fa;font-size:12px;color:#5b6272}
+table.cmp td:first-child{font-weight:700;white-space:nowrap}
+.note{margin-top:24px;background:#fff8e8;border:1px solid #f0dfb8;border-radius:15px;padding:20px 22px;font-size:14px}
+.note b{display:block;margin-bottom:8px}
+.note li{margin-left:18px;margin-top:6px}
+a.more{display:inline-block;margin-top:14px;font-size:13px;color:#1f3a8a;font-weight:700}
+@media(max-width:700px){.pros{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>재고관리 앱 — 모바일 시안 3종</h1>
+<p class="lede">
+전부 <b>폰 세로 화면 기준</b>입니다. 색이 아니라 <b>내비게이션 구조</b>가 다릅니다 —
+① 홈이 버튼 발사대, ② 홈이 검색 목록, ③ 홈이 거점 카드 스와이프.
+테스트 데이터는 강아지 간식입니다.
+</p>
+<div class="legend">
+  <span>P1 물류창고 — 폰 · 하루 여러 번 · 속도</span>
+  <span>P2 영업 — 검색 · 팝업 정산</span>
+  <span>공통 기능: 할 일 카드(E2) · 유통기한 6자리(E1) · 정산 리포트(E3)</span>
+</div>
+
+<!-- ═════════ 시안 1 ═════════ -->
+<section class="plan S1">
+  <div class="phead"><span class="badge" style="background:#1f3a8a">시안 1</span>
+    <div><h2>발사대 — 홈에 큰 버튼 4개 + 하단 탭</h2>
+      <p>홈은 정보를 보여주는 곳이 아니라 <b>동작을 고르는 곳</b>이다. 오늘 할 일 카드가 맨 위, 그 아래 입고·출고·발송·팝업 버튼.
+      화면 이동은 하단 탭 4개로 고정된다. 가장 익숙하고 가장 안전한 구조.</p>
+      <p class="tagline">분위기: 미니멀 · 남색 단색 · 큰 터치 영역</p></div>
+  </div>
+  <div class="row">
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="nav"><b>재고</b><span class="muted" style="font-size:12px">이현</span></div>
+        <div class="todo"><h4>오늘 할 일</h4>
+          <div class="trow"><span>풀필먼트 반영</span><span class="muted">A ✅ B ✅ C ⬜</span></div>
+          <div class="trow"><span>미확인 배송</span><span style="color:#c2410c;font-weight:700">3건 ›</span></div>
+          <div class="trow"><span>유통기한 만료</span><span style="color:#c2410c;font-weight:700">2건 ›</span></div>
+        </div>
+        <div class="grid">
+          <div class="act"><div class="ic">📥</div><div class="lb">입고</div></div>
+          <div class="act"><div class="ic">📤</div><div class="lb">출고</div></div>
+          <div class="act"><div class="ic">🚚</div><div class="lb">풀필먼트 발송</div></div>
+          <div class="act"><div class="ic">🎪</div><div class="lb">팝업</div></div>
+        </div>
+        <div class="search">🔍 상품 검색…</div>
+      </div>
+      <div class="tabs"><div class="on"><span class="ic">◉</span>홈</div><div><span class="ic">▤</span>재고</div><div><span class="ic">↺</span>이력</div><div><span class="ic">☰</span>설정</div></div>
+    </div></div><div class="cap"><b>홈</b>할 일 + 동작 4개</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="nav"><b>‹ 입고</b><span class="muted" style="font-size:12px">오늘 12건</span></div>
+        <div class="chip">🦴 강아지 치즈 간식 200g</div>
+        <div class="field">2 7 0 3 3 1</div>
+        <div class="hint">→ <b>2027-03-31</b> · 1년 7개월 남음</div>
+        <div class="kbd"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div style="font-size:12px;color:#1f3a8a">＋기한</div><div>0</div><div>⌫</div></div>
+        <div class="lrow"><div><div class="nm">2026-11-30</div><div class="sub">방금 입력</div></div><span class="qt">15</span></div>
+      </div>
+      <div class="cta">저장하고 다음 상품</div>
+    </div></div><div class="cap"><b>입고</b>유통기한 6자리 · 저장 후 바로 다음</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="nav"><b>‹ 풀필먼트 A</b><span class="muted" style="font-size:12px">어제분</span></div>
+        <div class="mrow"><div><div class="nm">강아지 치즈 간식 200g</div><div class="sub">현재 150 → 143</div></div><div class="inputbox">7</div></div>
+        <div class="mrow"><div><div class="nm">강아지 우유껌 M</div><div class="sub">현재 64</div></div><div class="inputbox empty">0</div></div>
+        <div class="mrow"><div><div class="nm">오리목뼈 껌 5p</div><div class="sub">현재 18 → 15</div></div><div class="inputbox">3</div></div>
+        <div class="mrow"><div><div class="nm">닭가슴살 저키 100g</div><div class="sub">현재 42</div></div><div class="inputbox empty">0</div></div>
+        <div class="mrow"><div><div class="nm">고구마 말랭이 150g</div><div class="sub">현재 30 → 28</div></div><div class="inputbox">2</div></div>
+        <div class="sum"><span>입력 3건</span><span>총 12개 차감</span></div>
+      </div>
+      <div class="cta">저장 · 오늘 반영 완료</div>
+    </div></div><div class="cap"><b>풀필먼트 일일 반영</b>표 대신 세로 리스트</div></div>
+  </div>
+  <div class="pros">
+    <div class="good"><b>강점</b>
+      <li>입고·출고가 홈에서 <b>2탭</b>이면 시작된다 — 가장 빠르다</li>
+      <li>할 일 카드가 화면 최상단이라 빠뜨림이 없다</li>
+      <li>구조가 흔해서 P2도 처음에 헤매지 않는다</li>
+    </div>
+    <div class="bad"><b>약점</b>
+      <li>재고 조회가 한 탭 건너에 있다 — 검색이 주 목적인 P2에겐 한 단계 멀다</li>
+      <li>홈 상단을 할 일 카드가 늘 차지한다</li>
+      <li>거점별 현황을 보려면 따로 들어가야 한다</li>
+    </div>
+  </div>
+  <div class="who"><b>주 타깃:</b> P1 물류창고 — 하루 수십 번 입력하는 사람 기준</div>
+  <a class="more" href="./option1-full.html">→ 시안 1 전체 화면(10개) 자세히 보기</a>
+</section>
+
+<!-- ═════════ 시안 2 ═════════ -->
+<section class="plan S2">
+  <div class="phead"><span class="badge" style="background:#0b7285">시안 2</span>
+    <div><h2>검색대 — 홈이 곧 재고 목록, 동작은 ＋ 버튼</h2>
+      <p>앱을 열면 <b>바로 재고가 보인다.</b> 상단은 검색창, 할 일은 얇은 배너 한 줄로 접힌다.
+      입고·출고 같은 동작은 우하단 <b>＋</b>를 눌러 올라오는 시트에서 고른다. 탭바가 없어 목록이 길게 보인다.</p>
+      <p class="tagline">분위기: 실용 · 정보 밀도 높음 · 청록 포인트</p></div>
+  </div>
+  <div class="row">
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="top"><div class="t">전체 재고 24 SKU · 가용 4,120</div><div class="sfield">🔍 상품 검색</div></div>
+        <div class="banner"><span>⚠ 오늘 할 일 3 · 풀필 C 미반영 · 배송 3건</span><span>›</span></div>
+        <div class="seg"><span class="on">전체</span><span>임박 3</span><span>만료 2</span><span>자사창고</span><span>풀필A</span></div>
+        <div class="item"><div><div class="nm">강아지 치즈 간식 200g</div><div class="meta">자사창고 120 · 풀필 220 · <span class="tag t-soon">임박 30</span></div></div><div class="rt"><div class="big">340</div><div class="u">가용</div></div></div>
+        <div class="item"><div><div class="nm">강아지 우유껌 M</div><div class="meta">자사창고 64 · 풀필 90</div></div><div class="rt"><div class="big">154</div><div class="u">가용</div></div></div>
+        <div class="item"><div><div class="nm">오리목뼈 껌 5p</div><div class="meta">자사창고 18 · <span class="tag t-exp">만료 6</span></div></div><div class="rt"><div class="big">18</div><div class="u">가용</div></div></div>
+        <div class="item"><div><div class="nm">닭가슴살 저키 100g</div><div class="meta">풀필A 42</div></div><div class="rt"><div class="big">42</div><div class="u">가용</div></div></div>
+        <div class="item"><div><div class="nm">고구마 말랭이 150g</div><div class="meta">자사창고 30 · 배송중 20</div></div><div class="rt"><div class="big">30</div><div class="u">가용</div></div></div>
+      </div>
+      <div class="fab">＋</div>
+    </div></div><div class="cap"><b>홈 = 재고 목록</b>검색이 최상단 · 할 일은 배너 한 줄</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body" style="filter:brightness(.97)">
+        <div class="top"><div class="t">전체 재고 24 SKU · 가용 4,120</div><div class="sfield">🔍 상품 검색</div></div>
+        <div class="banner"><span>⚠ 오늘 할 일 3</span><span>›</span></div>
+        <div class="item"><div><div class="nm">강아지 치즈 간식 200g</div><div class="meta">자사창고 120 · 풀필 220</div></div><div class="rt"><div class="big">340</div></div></div>
+        <div class="item"><div><div class="nm">강아지 우유껌 M</div><div class="meta">자사창고 64 · 풀필 90</div></div><div class="rt"><div class="big">154</div></div></div>
+      </div>
+      <div class="sheet">
+        <div class="handle"></div>
+        <div class="srow"><span class="ic">📥</span>입고</div>
+        <div class="srow"><span class="ic">📤</span>출고</div>
+        <div class="srow"><span class="ic">🚚</span>풀필먼트 발송</div>
+        <div class="srow"><span class="ic">📝</span>풀필먼트 일일 반영</div>
+        <div class="srow" style="border-bottom:0"><span class="ic">🎪</span>팝업 반출 · 정산</div>
+      </div>
+    </div></div><div class="cap"><b>＋ 액션 시트</b>모든 동작이 한 버튼 뒤에 모임</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="hdr2"><b>‹ 풀필먼트 A 반영</b><span class="muted" style="font-size:11.5px">8/18</span></div>
+        <div class="seg"><span class="on">최근 움직임</span><span>전체 24</span><span>입력한 것</span></div>
+        <div class="mrow"><div><div class="nm" style="font-size:13px;font-weight:700">강아지 치즈 간식 200g</div><div class="meta" style="font-size:11px;color:#7c8794">현재 150 → 143</div></div><div class="inputbox">7</div></div>
+        <div class="mrow"><div><div class="nm" style="font-size:13px;font-weight:700">강아지 우유껌 M</div><div class="meta" style="font-size:11px;color:#7c8794">현재 64</div></div><div class="inputbox empty">0</div></div>
+        <div class="mrow"><div><div class="nm" style="font-size:13px;font-weight:700">오리목뼈 껌 5p</div><div class="meta" style="font-size:11px;color:#7c8794">현재 18 → 15</div></div><div class="inputbox">3</div></div>
+        <div class="mrow"><div><div class="nm" style="font-size:13px;font-weight:700">닭가슴살 저키 100g</div><div class="meta" style="font-size:11px;color:#7c8794">현재 42</div></div><div class="inputbox empty">0</div></div>
+        <div class="kv"><span>입력 3건</span><b>총 12개 차감</b></div>
+      </div>
+      <div class="savebar">저장 · 오늘 반영 완료</div>
+    </div></div><div class="cap"><b>풀필먼트 일일 반영</b>필터로 목록을 줄여서 입력</div></div>
+  </div>
+  <div class="pros">
+    <div class="good"><b>강점</b>
+      <li>"이거 재고 있어요?"에 <b>앱 열자마자</b> 답한다 (P2에게 최적)</li>
+      <li>탭바가 없어 한 화면에 목록이 더 많이 보인다</li>
+      <li>동작이 ＋ 하나에 모여 화면이 단순하다</li>
+    </div>
+    <div class="bad"><b>약점</b>
+      <li>입고·출고가 <b>＋ → 시트 → 화면</b>으로 한 단계 늘어난다 (P1 손해)</li>
+      <li>할 일이 얇은 배너라 눈에 덜 띈다 — 빠뜨릴 위험</li>
+      <li>목록이 길어 매일 하는 작업이 스크롤에 묻힌다</li>
+    </div>
+  </div>
+  <div class="who"><b>주 타깃:</b> 조회가 잦은 사람. 입력 위주라면 손해</div>
+</section>
+
+<!-- ═════════ 시안 3 ═════════ -->
+<section class="plan S3">
+  <div class="phead"><span class="badge" style="background:#4c1d95">시안 3</span>
+    <div><h2>거점 스와이프 — 창고 한 곳씩 넘겨 본다</h2>
+      <p>홈이 <b>거점 카드</b>다. 자사창고 → 배송 중 → 풀필A/B/C → 팝업을 좌우로 넘기며 보고,
+      하단 버튼은 <b>지금 보고 있는 거점에 맞게 바뀐다</b>(자사창고면 입고·출고, 풀필먼트면 반영·도착 확인).</p>
+      <p class="tagline">분위기: 카드 중심 · 그라디언트 · 보라 포인트</p></div>
+  </div>
+  <div class="row">
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="pager"><span class="pg on">자사창고</span><span class="pg">배송중 3</span><span class="pg">풀필A</span><span class="pg">풀필B</span></div>
+        <div class="card">
+          <div class="lb">자사창고</div>
+          <div class="n">1,240<span style="font-size:14px;opacity:.8">개</span></div>
+          <div class="sub">24 SKU · 오늘 입고 12 · 출고 8</div>
+          <div class="pillrow"><span class="pill">임박 3</span><span class="pill">만료 1</span><span class="pill">팝업 반출중 160</span></div>
+        </div>
+        <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <div class="sect">유통기한 임박·만료</div>
+        <div class="lot"><div><div class="nm">오리목뼈 껌 5p</div><div class="sub">2026-08-10 · 만료됨</div></div><div style="text-align:right"><span class="qt">6</span><br><span class="tag t-exp">폐기</span></div></div>
+        <div class="lot"><div><div class="nm">강아지 우유껌 M</div><div class="sub">2026-09-10 · 23일</div></div><div style="text-align:right"><span class="qt">30</span><br><span class="tag t-soon">임박</span></div></div>
+        <div class="lot"><div><div class="nm">고구마 말랭이 150g</div><div class="sub">2026-09-28 · 41일</div></div><span class="qt">12</span></div>
+      </div>
+      <div class="ctxbar"><div class="b1">입고</div><div class="b1">출고</div><div class="b2">발송</div></div>
+    </div></div><div class="cap"><b>홈 = 거점 카드</b>하단 버튼이 거점에 따라 바뀜</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="pager"><span class="pg">자사창고</span><span class="pg">배송중 3</span><span class="pg on">풀필A</span><span class="pg">풀필B</span></div>
+        <div class="card" style="background:linear-gradient(160deg,#6d28d9,#4c1d95)">
+          <div class="lb">풀필먼트 A</div>
+          <div class="n">1,050<span style="font-size:14px;opacity:.8">개</span></div>
+          <div class="sub">마지막 반영 <b>오늘 09:12</b></div>
+          <div class="pillrow"><span class="pill">임박 1</span><span class="pill">어제 출고 12</span></div>
+        </div>
+        <div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i></div>
+        <div class="sect">어제 출고 반영</div>
+        <div class="mrow"><div><div class="nm" style="font-size:12.5px;font-weight:600">강아지 치즈 간식 200g</div><div class="sub" style="font-size:10.5px;color:#8b859c">현재 150 → 143</div></div><div class="inputbox">7</div></div>
+        <div class="mrow"><div><div class="nm" style="font-size:12.5px;font-weight:600">강아지 우유껌 M</div><div class="sub" style="font-size:10.5px;color:#8b859c">현재 64</div></div><div class="inputbox empty">0</div></div>
+        <div class="mrow"><div><div class="nm" style="font-size:12.5px;font-weight:600">오리목뼈 껌 5p</div><div class="sub" style="font-size:10.5px;color:#8b859c">현재 18 → 15</div></div><div class="inputbox">3</div></div>
+      </div>
+      <div class="ctxbar"><div class="b1">반영 저장</div><div class="b2">도착 확인</div></div>
+    </div></div><div class="cap"><b>풀필먼트 거점</b>거점 안에서 바로 일일 반영</div></div>
+
+    <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+      <div class="body">
+        <div class="pager"><span class="pg">풀필C</span><span class="pg on">성수 팝업</span></div>
+        <div class="card" style="background:linear-gradient(160deg,#7c3aed,#5b21b6)">
+          <div class="lb">성수 팝업 · 10.10–10.12</div>
+          <div class="n">42<span style="font-size:14px;opacity:.8">개 남음</span></div>
+          <div class="sub">누적 반출 160 · 2회 반출</div>
+          <div class="pillrow"><span class="pill">정산 대기</span></div>
+        </div>
+        <div class="sent">160개를 가져갔고 <b>42개</b>가 돌아왔습니다.<br>차감 118개 중 시식·증정 <b>5개</b>를 빼고<br><b>113개를 판매로 기록</b>합니다.</div>
+        <div class="sect">상품별 소진율</div>
+        <div class="bar"><div class="bl"><span>강아지 치즈 간식</span><span>45/50 · 90%</span></div><div class="track"><div class="fill" style="width:90%"></div></div></div>
+        <div class="bar"><div class="bl"><span>강아지 우유껌 M</span><span>32/40 · 80%</span></div><div class="track"><div class="fill" style="width:80%"></div></div></div>
+        <div class="bar"><div class="bl"><span>오리목뼈 껌 5p</span><span>21/40 · 53%</span></div><div class="track"><div class="fill" style="width:53%"></div></div></div>
+      </div>
+      <div class="ctxbar"><div class="b1">정산 확정</div><div class="b2">추가 반출</div></div>
+    </div></div><div class="cap"><b>팝업 거점</b>정산도 거점 화면 안에서</div></div>
+  </div>
+  <div class="pros">
+    <div class="good"><b>강점</b>
+      <li>“어디에 뭐가 있나”가 구조 자체로 해결된다 — 4거점 분산 문제에 정면 대응</li>
+      <li>거점마다 할 일이 붙어 있어 맥락이 살아 있다 (풀필 A에서 바로 반영)</li>
+      <li>팝업이 거점 하나로 자연스럽게 들어온다</li>
+    </div>
+    <div class="bad"><b>약점</b>
+      <li>입고·출고를 하려면 <b>먼저 거점을 맞춰야</b> 한다 — 늘 자사창고인데도</li>
+      <li>상품 중심 검색(“치즈 간식 몇 개?”)이 거점 뒤로 밀린다</li>
+      <li>하단 버튼이 화면마다 바뀌어 익히는 데 시간이 걸린다</li>
+    </div>
+  </div>
+  <div class="who"><b>주 타깃:</b> 거점 현황 파악이 주 업무인 관리자</div>
+</section>
+
+<table class="cmp">
+  <tr><th>비교</th><th>1 발사대</th><th>2 검색대</th><th>3 거점 스와이프</th></tr>
+  <tr><td>홈에 있는 것</td><td>할 일 + 버튼 4개</td><td>검색 + 재고 목록</td><td>거점 카드 + 임박 목록</td></tr>
+  <tr><td>동작 진입</td><td>홈 버튼 (2탭)</td><td>＋ → 시트 (3탭)</td><td>거점 이동 후 하단 버튼</td></tr>
+  <tr><td>화면 이동</td><td>하단 탭 4개</td><td>탭바 없음 · 뒤로가기</td><td>좌우 스와이프</td></tr>
+  <tr><td>S1 입고 속도</td><td>◎</td><td>○</td><td>○</td></tr>
+  <tr><td>S5 풀필먼트 반영</td><td>◎</td><td>◎</td><td>◎ 거점 안에서</td></tr>
+  <tr><td>S10 재고 조회</td><td>○ 탭 이동</td><td>◎ 즉시</td><td>△ 거점별로 흩어짐</td></tr>
+  <tr><td>할 일 눈에 띔(E2)</td><td>◎ 카드</td><td>△ 얇은 배너</td><td>○ 거점 배지</td></tr>
+  <tr><td>학습 부담</td><td>낮음</td><td>낮음</td><td>중간</td></tr>
+  <tr><td>구현(하루 예산)</td><td>쉬움</td><td>쉬움</td><td>스와이프·컨텍스트바 부담</td></tr>
+</table>
+
+<div class="note">
+  <b>고를 때 기준 하나만</b>
+  <li><b>입력이 더 중요하면 1번.</b> P1이 하루 수십 번 찍는 앱이고, 할 일 카드가 가장 잘 보인다</li>
+  <li><b>조회가 더 중요하면 2번.</b> 열자마자 재고가 보이지만, 입고·출고가 한 단계 멀어진다</li>
+  <li><b>3번은 개념은 맞지만 대가가 크다.</b> 늘 자사창고에서 일하는데 매번 거점을 맞춰야 한다</li>
+  <li>섞어도 됩니다 — 예: <b>1번 구조 + 홈 검색창을 2번처럼 상단 고정</b></li>
+</div>
+
+</div>
+</body>
+</html>

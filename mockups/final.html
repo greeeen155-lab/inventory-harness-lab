@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>재고관리 앱 — 확정 방향 (검색대 구조 + 보라)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Pretendard,sans-serif;background:#efedf3;color:#16181d;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:44px 22px 110px}
+h1{font-size:29px;letter-spacing:-.02em}
+.lede{color:#5b5570;margin-top:10px;max-width:800px;font-size:15px}
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.legend span{background:#fff;border:1px solid #ded9e8;border-radius:999px;padding:6px 13px;font-size:12.5px;color:#4c4560}
+h2.sec{margin:42px 0 6px;font-size:19px;letter-spacing:-.01em}
+h2.sec:before{content:"";display:block;width:34px;height:3px;background:#5b21b6;border-radius:9px;margin-bottom:11px}
+p.secd{color:#5b5570;font-size:14px;max-width:780px;margin-bottom:20px}
+.row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.sw{display:flex;flex-direction:column;align-items:center;width:282px}
+.cap{font-size:12px;color:#7a7390;margin-top:9px;text-align:center;line-height:1.45}
+.cap b{color:#2b2740;display:block;font-size:12.5px}
+
+.phone{width:282px;background:#fff;border:9px solid #201c2b;border-radius:34px;overflow:hidden;box-shadow:0 12px 28px rgba(35,24,60,.18)}
+.sb{background:#201c2b;color:#fff;font-size:10px;padding:3px 15px 6px;display:flex;justify-content:space-between}
+.scr{font-size:12.5px;height:530px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.body{flex:1;overflow:hidden}
+
+:root{
+  --acc:#5b21b6; --acc2:#7c3aed; --accsoft:#f4f0fd; --accline:#e2d9f5;
+  --ink:#221d33; --sub:#8b859c; --line:#eeeaf5;
+  --amber:#b45309; --amberbg:#fff6e9; --red:#b91c1c; --redbg:#fdecec; --ok:#0f7b45; --okbg:#eef7f1;
+}
+.top{background:linear-gradient(160deg,var(--acc2),var(--acc));padding:13px 15px 15px;color:#fff}
+.top .t{font-size:11.5px;opacity:.85}
+.top .t b{font-weight:800}
+.sfield{background:rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;margin-top:9px;font-size:13px;color:#ece5fb}
+.banner{background:var(--amberbg);border-bottom:1px solid #f3e3cd;padding:9px 15px;font-size:11.5px;color:#8a5a12;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.seg{display:flex;gap:6px;padding:10px 15px;border-bottom:1px solid var(--line);overflow:hidden}
+.seg span{font-size:11.5px;border:1px solid #e2ddec;border-radius:9px;padding:5px 10px;color:#5b5570;white-space:nowrap}
+.seg span.on{background:var(--accsoft);color:var(--acc);border-color:var(--accline);font-weight:800}
+.seg span.warn{background:var(--amberbg);color:var(--amber);border-color:#f0dcc0;font-weight:700}
+
+.item{padding:11px 15px;border-bottom:1px solid #f5f2fa;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.item .nm{font-size:13px;font-weight:700}
+.item .meta{font-size:11px;color:#7a7390;margin-top:3px}
+.exp{display:flex;align-items:center;gap:5px;margin-top:5px;font-size:11px;font-variant-numeric:tabular-nums}
+.exp .d{font-weight:700;color:#3f3856}
+.item .rt{text-align:right;flex:0 0 auto}
+.item .big{font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.item .u{font-size:10px;color:#7a7390;font-weight:600}
+.tag{font-size:9.5px;border-radius:999px;padding:2px 7px;font-weight:800;white-space:nowrap}
+.t-soon{background:var(--amberbg);color:var(--amber)}
+.t-exp{background:var(--redbg);color:var(--red)}
+.t-ok{background:var(--okbg);color:var(--ok)}
+.t-mv{background:var(--accsoft);color:var(--acc)}
+
+.fab{position:absolute;right:15px;bottom:16px;background:linear-gradient(160deg,var(--acc2),var(--acc));color:#fff;border-radius:17px;padding:14px 18px;font-size:15px;font-weight:800;box-shadow:0 8px 20px rgba(91,33,182,.4)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(35,24,60,.16);padding:8px 0 14px}
+.handle{width:38px;height:4px;background:#e2ddec;border-radius:9px;margin:4px auto 10px}
+.srow{padding:12px 18px;font-size:13.5px;font-weight:700;display:flex;gap:11px;align-items:center;border-bottom:1px solid #f7f4fc}
+.srow .ic{font-size:16px}
+
+.hdr{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.hdr b{font-size:14.5px}
+.hdr .r{font-size:11.5px;color:var(--sub)}
+.sect{padding:12px 15px 5px;font-size:10.5px;color:var(--sub);letter-spacing:.06em;font-weight:800}
+.lrow{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;border-bottom:1px solid var(--line)}
+.lrow .nm{font-size:12.5px;font-weight:600}
+.lrow .sub{font-size:10.5px;color:var(--sub);margin-top:2px}
+.lrow .qt{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.dim{background:#faf9fc;color:var(--sub)}
+.hero{padding:15px 15px 4px}
+.hero .q{font-size:11.5px;color:var(--sub)}
+.hero .n{font-size:40px;font-weight:800;letter-spacing:-.035em;color:var(--acc);line-height:1.12}
+.hero .u{font-size:13px;color:var(--sub);font-weight:700;margin-left:3px}
+
+.lotcard{margin:8px 15px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.lotcard.soon{border-color:#f0dcc0;background:#fffdf8}
+.lotcard .lh{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid var(--line)}
+.lotcard .dt{font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.lotcard .dl{font-size:10.5px;color:var(--sub);margin-top:2px}
+.lotcard .lb{display:flex;justify-content:space-between;padding:8px 13px;font-size:11.5px;color:#5b5570}
+.bar-mini{height:5px;background:#f1edf8;border-radius:9px;overflow:hidden;margin:0 13px 10px}
+.bar-mini i{display:block;height:100%;background:var(--acc2);border-radius:9px}
+.bar-mini i.warn{background:var(--amber)}
+
+.chip{background:var(--accsoft);border:1px solid var(--accline);border-radius:12px;padding:10px 13px;font-size:13px;font-weight:700;margin:12px 15px 0;color:var(--acc)}
+.field{margin:12px 15px 4px;border:2px solid var(--acc);border-radius:12px;padding:11px 13px;font-size:20px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums}
+.hint{margin:0 15px;font-size:11.5px;color:#5b5570}
+.hint b{color:var(--acc)}
+.chips{display:flex;gap:6px;padding:9px 15px 0;flex-wrap:wrap}
+.chips span{background:var(--accsoft);color:var(--acc);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800}
+.kbd{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 15px 6px}
+.kbd div{background:#f5f3f9;border-radius:11px;text-align:center;padding:11px 0;font-size:17px;font-weight:700}
+.kbd div.fn{font-size:12px;color:var(--acc);font-weight:800}
+
+.mrow{padding:10px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mrow .nm{font-size:12.5px;font-weight:700}
+.mrow .sub{font-size:10.5px;color:var(--sub);margin-top:3px}
+.inputbox{border:2px solid var(--acc);border-radius:11px;padding:8px 11px;min-width:62px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--acc)}
+.inputbox.empty{border-color:#e2ddec;color:#c9c3d6}
+.kv{display:flex;justify-content:space-between;padding:10px 15px;font-size:12.5px;background:var(--accsoft);font-weight:700;color:var(--acc)}
+.savebar{background:linear-gradient(160deg,var(--acc2),var(--acc));color:#fff;padding:15px;text-align:center;font-weight:800;font-size:14px}
+.ghostbar{background:var(--accsoft);color:var(--acc);padding:15px;text-align:center;font-weight:800;font-size:14px;border-top:1px solid var(--accline)}
+.sent{margin:13px 15px;background:var(--accsoft);border:1px solid var(--accline);border-radius:14px;padding:14px;font-size:12.5px;line-height:1.75}
+.sent b{color:var(--acc);font-weight:800}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:11px 15px 4px}
+.kpi{background:#f7f5fb;border-radius:12px;padding:10px 3px;text-align:center}
+.kpi .k{font-size:10px;color:var(--sub)}
+.kpi .v{font-size:17px;font-weight:800;margin-top:2px}
+.bars{padding:2px 15px 8px}
+.bar{margin-top:9px}
+.bl{display:flex;justify-content:space-between;font-size:11.5px}
+.track{height:7px;background:#f1edf8;border-radius:99px;margin-top:4px;overflow:hidden}
+.fill{height:100%;background:var(--acc2);border-radius:99px}
+
+.note{margin-top:34px;background:#fff;border:1px solid #ded9e8;border-radius:15px;padding:22px 24px;font-size:14px}
+.note b{display:block;margin-bottom:9px;font-size:15px}
+.note li{margin-left:18px;margin-top:7px}
+.pal{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.pal div{border-radius:11px;padding:11px 13px;font-size:11.5px;font-weight:700;color:#fff;min-width:118px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>확정 방향 — 검색대 구조 + 보라 팔레트</h1>
+<p class="lede">
+<b>시안 2의 구조</b>(홈 = 검색 + 재고 목록, 동작은 ＋ 버튼)에 <b>시안 3의 색</b>(보라 그라디언트)을 입혔습니다.
+그리고 지적하신 대로 <b>유통기한을 모든 화면에 드러냈습니다</b> — 목록에는 가장 임박한 날짜와 남은 일수가 항상 보이고,
+상세에서는 로트 카드로 펼쳐집니다.
+</p>
+<div class="legend">
+  <span>홈에서 바로 검색·조회</span>
+  <span>유통기한 상시 노출</span>
+  <span>동작은 ＋ 한 곳에</span>
+  <span>테스트 데이터: 강아지 간식</span>
+</div>
+
+<h2 class="sec">1. 홈 — 열자마자 재고와 유통기한</h2>
+<p class="secd">목록의 각 줄에 <b>가장 임박한 유통기한과 남은 일수</b>가 들어갔습니다. 배지만으로는 "언제까지인지"를 알 수 없었습니다.</p>
+<div class="row">
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="top"><div class="t">전체 24 SKU · 가용 <b>4,120</b>개</div><div class="sfield">🔍 상품 검색</div></div>
+      <div class="banner"><span>⚠ 오늘 할 일 3 · 풀필 C 미반영 · 배송 3건</span><span>›</span></div>
+      <div class="seg"><span class="on">전체</span><span class="warn">임박 3</span><span class="warn">만료 2</span><span>📍자사창고</span><span>📍풀필A</span><span>📍풀필B</span><span>📍팝업</span></div>
+
+      <div class="item">
+        <div><div class="nm">강아지 치즈 간식 200g</div>
+          <div class="meta">자사창고 120 · 풀필 220</div>
+          <div class="exp"><span class="tag t-soon">임박</span><span class="d">2026-09-10</span><span style="color:#8b859c">· 23일 · <b style="color:#5b5570">풀필A</b> 30개</span></div>
+        </div>
+        <div class="rt"><div class="big">340</div><div class="u">가용</div></div>
+      </div>
+
+      <div class="item">
+        <div><div class="nm">강아지 우유껌 M</div>
+          <div class="meta">자사창고 64 · 풀필 90</div>
+          <div class="exp"><span class="tag t-ok">정상</span><span class="d">2027-01-20</span><span style="color:#8b859c">· 최다 <b style="color:#5b5570">자사창고</b> 64</span></div>
+        </div>
+        <div class="rt"><div class="big">154</div><div class="u">가용</div></div>
+      </div>
+
+      <div class="item">
+        <div><div class="nm">오리목뼈 껌 5p</div>
+          <div class="meta">자사창고 18</div>
+          <div class="exp"><span class="tag t-exp">만료</span><span class="d">2026-08-10</span><span style="color:#8b859c">· 8일 지남 · <b style="color:#5b5570">자사창고</b> 6개</span></div>
+        </div>
+        <div class="rt"><div class="big">12</div><div class="u">가용</div></div>
+      </div>
+
+      <div class="item">
+        <div><div class="nm">닭가슴살 저키 100g</div>
+          <div class="meta">풀필A 42</div>
+          <div class="exp"><span class="tag t-ok">정상</span><span class="d">2027-06-30</span><span style="color:#8b859c">· <b style="color:#5b5570">풀필A</b> 42</span></div>
+        </div>
+        <div class="rt"><div class="big">42</div><div class="u">가용</div></div>
+      </div>
+    </div>
+    <div class="fab">＋</div>
+  </div></div><div class="cap"><b>홈</b>줄마다 가장 임박한 유통기한 표시</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="top"><div class="t">유통기한 관리 · 임박 3 · 만료 2</div><div class="sfield">🔍 상품 검색</div></div>
+      <div class="seg"><span>전체</span><span class="on">임박 3</span><span class="warn">만료 2</span><span>60일 이내</span></div>
+      <div class="sect">지난 것 — 폐기 확인 필요</div>
+      <div class="lotcard soon">
+        <div class="lh"><div><div class="dt">2026-08-10</div><div class="dl">오리목뼈 껌 5p · <b>📍 자사창고</b></div></div>
+          <div style="text-align:right"><div class="qt" style="font-size:16px;font-weight:800">6</div><span class="tag t-exp">8일 지남</span></div></div>
+        <div class="lb"><span>자동으로 빠지지 않습니다</span><span style="color:var(--acc);font-weight:800">폐기 처리 ›</span></div>
+      </div>
+      <div class="sect">임박 — 먼저 밀어낼 것</div>
+      <div class="lotcard soon">
+        <div class="lh"><div><div class="dt">2026-09-10</div><div class="dl">강아지 치즈 간식 200g · <b>📍 풀필먼트 A</b></div></div>
+          <div style="text-align:right"><div style="font-size:16px;font-weight:800">30</div><span class="tag t-soon">23일</span></div></div>
+        <div class="bar-mini"><i class="warn" style="width:24%"></i></div>
+      </div>
+      <div class="lotcard">
+        <div class="lh"><div><div class="dt">2026-09-28</div><div class="dl">고구마 말랭이 150g · <b>📍 자사창고</b></div></div>
+          <div style="text-align:right"><div style="font-size:16px;font-weight:800">12</div><span class="tag t-soon">41일</span></div></div>
+        <div class="bar-mini"><i style="width:42%"></i></div>
+      </div>
+    </div>
+    <div class="ghostbar">임박 재고는 출고 시 자동으로 먼저 나갑니다</div>
+  </div></div><div class="cap"><b>유통기한 탭</b>임박·만료를 날짜순으로 (S11·S12)</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body" style="filter:brightness(.98)">
+      <div class="top"><div class="t">전체 24 SKU · 가용 <b>4,120</b>개</div><div class="sfield">🔍 상품 검색</div></div>
+      <div class="banner"><span>⚠ 오늘 할 일 3</span><span>›</span></div>
+      <div class="item"><div><div class="nm">강아지 치즈 간식 200g</div><div class="meta">자사창고 120 · 풀필 220</div></div><div class="rt"><div class="big">340</div></div></div>
+      <div class="item"><div><div class="nm">강아지 우유껌 M</div><div class="meta">자사창고 64 · 풀필 90</div></div><div class="rt"><div class="big">154</div></div></div>
+    </div>
+    <div class="sheet">
+      <div class="handle"></div>
+      <div class="srow"><span class="ic">📥</span>입고</div>
+      <div class="srow"><span class="ic">📤</span>출고</div>
+      <div class="srow"><span class="ic">🚚</span>풀필먼트 발송</div>
+      <div class="srow"><span class="ic">📝</span>풀필먼트 일일 반영</div>
+      <div class="srow" style="border-bottom:0"><span class="ic">🎪</span>팝업 반출 · 정산</div>
+    </div>
+  </div></div><div class="cap"><b>＋ 액션 시트</b>모든 동작이 한 버튼 뒤에</div></div>
+</div>
+
+<h2 class="sec">2. 상품 상세 — 유통기한이 주인공</h2>
+<p class="secd">가용 수량이 대표 숫자이되, 그 아래는 <b>로트 카드</b>다. 어느 기한이 몇 개이고 며칠 남았는지, 어디에 있는지가 한 장에 들어온다.</p>
+<div class="row">
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 강아지 치즈 간식 200g</b></div>
+      <div class="hero"><div class="q">지금 출고 가능</div><div class="n">340<span class="u">개</span></div></div>
+      <div class="seg" style="margin-top:6px"><span class="on">유통기한순</span><span>거점순</span></div>
+      <div class="sect">로트 = 거점 × 유통기한 · 나가는 순서</div>
+
+      <div class="lotcard soon">
+        <div class="lh">
+          <div><div class="dt">2026-09-10</div><div class="dl">23일 남음</div></div>
+          <div style="text-align:right"><div style="font-size:17px;font-weight:800">30</div><span class="tag t-soon">1순위</span></div>
+        </div>
+        <div class="lb" style="border-top:1px solid var(--line)"><span>📍 풀필먼트 A</span><b>30개</b></div>
+        <div class="bar-mini"><i class="warn" style="width:24%"></i></div>
+      </div>
+
+      <div class="lotcard">
+        <div class="lh">
+          <div><div class="dt">2027-03-31</div><div class="dl">1년 7개월 · 거점 2곳</div></div>
+          <div style="text-align:right"><div style="font-size:17px;font-weight:800">240</div><span class="tag t-ok">2순위</span></div>
+        </div>
+        <div class="lb" style="border-top:1px solid var(--line)"><span>📍 자사창고</span><b>120개</b></div>
+        <div class="lb" style="border-top:1px solid var(--line)"><span>📍 풀필먼트 A</span><b>120개</b></div>
+        <div class="bar-mini"><i style="width:88%"></i></div>
+      </div>
+
+      <div class="lotcard">
+        <div class="lh">
+          <div><div class="dt">2027-08-15</div><div class="dl">2년</div></div>
+          <div style="text-align:right"><div style="font-size:17px;font-weight:800">70</div><span class="tag t-ok">3순위</span></div>
+        </div>
+        <div class="lb" style="border-top:1px solid var(--line)"><span>📍 풀필먼트 B</span><b>70개</b></div>
+        <div class="bar-mini"><i style="width:100%"></i></div>
+      </div>
+
+      <div class="sect">가용에서 제외</div>
+      <div class="lrow dim"><div><div class="nm">배송 중 · 풀필C</div><div class="sub">2027-03-31 · 4일 경과</div></div><span class="qt">40</span></div>
+      <div class="lrow dim"><div><div class="nm">팝업 보유 · 성수</div><div class="sub">2027-03-31</div></div><span class="qt">60</span></div>
+    </div>
+    <div class="savebar">이 상품 출고</div>
+  </div></div><div class="cap"><b>상품 상세 (S10)</b>로트 카드 = 나가는 순서</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 입고</b><span class="r">오늘 12건</span></div>
+      <div style="display:flex;gap:7px;padding:11px 15px 0">
+        <div style="flex:1;background:#f5f3f9;border:1px solid #e2ddec;border-radius:11px;padding:9px 12px;font-size:12px"><span style="color:#8b859c;font-size:10.5px;display:block">받는 곳</span><b>📍 자사창고 ⌄</b></div>
+        <div style="flex:1;background:#f5f3f9;border:1px solid #e2ddec;border-radius:11px;padding:9px 12px;font-size:12px"><span style="color:#8b859c;font-size:10.5px;display:block">사유</span><b>입고 ⌄</b></div>
+      </div>
+      <div class="chip">🦴 강아지 치즈 간식 200g</div>
+      <div class="field">2 7 0 3 3 1</div>
+      <div class="hint">→ <b>2027-03-31</b> · 1년 7개월 남음</div>
+      <div class="chips"><span>최근 270331</span><span>261130</span><span>2703 = 말일</span></div>
+      <div class="kbd"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div class="fn">＋기한</div><div>0</div><div>⌫</div></div>
+      <div class="sect">이번 입고에 담긴 것</div>
+      <div class="lrow"><div><div class="nm">2026-11-30</div><div class="sub">104일 남음 · 방금 입력</div></div><span class="qt">15</span></div>
+    </div>
+    <div class="savebar">저장하고 다음 상품</div>
+  </div></div><div class="cap"><b>입고 (S1·E1)</b>6자리로 찍고 한 상품에 기한 여러 개</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 출고</b><span class="r">사유 판매 ⌄</span></div>
+      <div style="display:flex;gap:7px;padding:11px 15px 0">
+        <div style="flex:1;background:#f5f3f9;border:1px solid #e2ddec;border-radius:11px;padding:9px 12px;font-size:12px"><span style="color:#8b859c;font-size:10.5px;display:block">빼는 곳</span><b>📍 자사창고 ⌄</b></div>
+        <div style="flex:1;background:#f5f3f9;border:1px solid #e2ddec;border-radius:11px;padding:9px 12px;font-size:12px"><span style="color:#8b859c;font-size:10.5px;display:block">이 거점 보유</span><b>65개</b></div>
+      </div>
+      <div class="chip">🦴 강아지 우유껌 M</div>
+      <div class="sect">출고 수량</div>
+      <div class="field" style="letter-spacing:0">20</div>
+      <div class="sect">자동 선택 — 유통기한 빠른 순</div>
+      <div class="lotcard soon">
+        <div class="lh"><div><div class="dt">2026-09-10</div><div class="dl">📍 자사창고 · 보유 15 · 23일 · 전부 사용</div></div>
+        <div style="text-align:right"><div style="font-size:17px;font-weight:800">15</div><span class="tag t-soon">먼저</span></div></div>
+      </div>
+      <div class="lotcard">
+        <div class="lh"><div><div class="dt">2027-01-20</div><div class="dl">📍 자사창고 · 보유 50 · 5개만 사용</div></div>
+        <div style="text-align:right"><div style="font-size:17px;font-weight:800">5</div><span class="tag t-ok">다음</span></div></div>
+      </div>
+      <div class="hint" style="margin-top:11px">선택한 거점 안에서 임박한 것부터 나갑니다 · <b>변경</b></div>
+    </div>
+    <div class="savebar">20개 출고</div>
+  </div></div><div class="cap"><b>출고 (S2)</b>FEFO 배분을 날짜로 보여줌</div></div>
+</div>
+
+<h2 class="sec">3. 다건 입력에도 유통기한이 보인다</h2>
+<p class="secd">수량만 찍는 화면이지만, <b>어느 유통기한에서 빠지는지</b>를 작은 글씨로 함께 보여준다. 사용자가 고르지는 않되 결과는 안다.</p>
+<div class="row">
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 풀필먼트 A 반영</b><span class="r">8/18 어제분</span></div>
+      <div class="seg"><span class="on">최근 움직임</span><span>전체 24</span><span>입력한 것</span></div>
+      <div class="mrow"><div><div class="nm">강아지 치즈 간식 200g</div><div class="sub">150 → 143 · <b style="color:var(--amber)">2026-09-10</b>에서 차감</div></div><div class="inputbox">7</div></div>
+      <div class="mrow"><div><div class="nm">강아지 우유껌 M</div><div class="sub">현재 64</div></div><div class="inputbox empty">0</div></div>
+      <div class="mrow"><div><div class="nm">오리목뼈 껌 5p</div><div class="sub">18 → 15 · <b style="color:var(--amber)">2026-08-10</b>에서 차감</div></div><div class="inputbox">3</div></div>
+      <div class="mrow"><div><div class="nm">닭가슴살 저키 100g</div><div class="sub">현재 42</div></div><div class="inputbox empty">0</div></div>
+      <div class="mrow"><div><div class="nm">고구마 말랭이 150g</div><div class="sub">30 → 28 · <b>2027-02-28</b>에서 차감</div></div><div class="inputbox">2</div></div>
+      <div class="kv"><span>입력 3건</span><span>총 12개 차감</span></div>
+    </div>
+    <div class="savebar">저장 · 오늘 반영 완료</div>
+  </div></div><div class="cap"><b>풀필먼트 일일 반영 (S5)</b>수량만 찍되 차감 로트는 보인다</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 성수 팝업 정산</b><span class="r">1/2</span></div>
+      <div style="padding:10px 15px;font-size:11.5px;color:#5b5570;background:var(--accsoft)">📍 성수 팝업 → 자사창고 복귀 · 돌아온 물건을 세어 입력하세요</div>
+      <div class="mrow"><div><div class="nm">강아지 치즈 간식 200g</div><div class="sub">반출 50 · <b>2027-03-31</b></div></div><div class="inputbox">5</div></div>
+      <div class="mrow"><div><div class="nm">강아지 우유껌 M</div><div class="sub">반출 40 · <b style="color:var(--amber)">2026-09-10</b></div></div><div class="inputbox">8</div></div>
+      <div class="mrow"><div><div class="nm">오리목뼈 껌 5p</div><div class="sub">반출 40 · <b>2027-01-20</b></div></div><div class="inputbox">19</div></div>
+      <div class="mrow"><div><div class="nm">닭가슴살 저키 100g</div><div class="sub">반출 30 · <b>2027-06-30</b></div></div><div class="inputbox">10</div></div>
+      <div class="kv"><span>누적 반출 160</span><span>반입 42</span></div>
+      <div style="padding:11px 15px"><div style="font-size:11.5px;color:var(--sub);margin-bottom:6px">이 중 시식·증정으로 나간 수량</div><div class="inputbox" style="display:block;text-align:left">5</div></div>
+    </div>
+    <div class="savebar">다음 · 계산 확인</div>
+  </div></div><div class="cap"><b>팝업 정산 ① (S9)</b>로트별로 세니 기한이 보존된다</div></div>
+
+  <div class="sw"><div class="phone"><div class="sb"><span>9:41</span><span>▮▮▮</span></div><div class="scr">
+    <div class="body">
+      <div class="hdr"><b>‹ 확인</b><span class="r">2/2</span></div>
+      <div class="sent">
+        160개를 가져갔고 <b>42개</b>가 돌아왔습니다.<br>
+        차감 118개 중 시식·증정 <b>5개</b>를 빼고<br>
+        <b>113개를 판매로 기록</b>합니다.<br>
+        <span style="color:#5b5570;font-size:11.5px">남은 42개는 유통기한 그대로 자사창고로 돌아갑니다.</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">반출</div><div class="v">160</div></div>
+        <div class="kpi"><div class="k">판매</div><div class="v">113</div></div>
+        <div class="kpi"><div class="k">시식</div><div class="v">5</div></div>
+        <div class="kpi"><div class="k">반입</div><div class="v">42</div></div>
+      </div>
+      <div class="sect">상품별 소진율</div>
+      <div class="bars">
+        <div class="bar"><div class="bl"><span>강아지 치즈 간식</span><span>45/50 · 90%</span></div><div class="track"><div class="fill" style="width:90%"></div></div></div>
+        <div class="bar"><div class="bl"><span>강아지 우유껌 M</span><span>32/40 · 80%</span></div><div class="track"><div class="fill" style="width:80%"></div></div></div>
+        <div class="bar"><div class="bl"><span>오리목뼈 껌 5p</span><span>21/40 · 53%</span></div><div class="track"><div class="fill" style="width:53%"></div></div></div>
+        <div class="bar"><div class="bl"><span>닭가슴살 저키</span><span>20/30 · 67%</span></div><div class="track"><div class="fill" style="width:67%"></div></div></div>
+      </div>
+    </div>
+    <div class="savebar">정산 확정</div>
+  </div></div><div class="cap"><b>팝업 정산 ② (E3)</b>역산을 문장으로 확인</div></div>
+</div>
+
+<div class="note">
+  <b>유통기한을 어디에 어떻게 넣었나</b>
+  <li><b>홈 목록</b> — 줄마다 <b>가장 임박한 기한 + 남은 일수 + 그 수량</b>. 배지만 있던 것을 날짜까지 표시</li>
+  <li><b>상품 상세</b> — 로트 카드가 <b>나가는 순서(1순위·2순위)</b>로 정렬. 남은 기간을 막대로도 표시</li>
+  <li><b>출고</b> — FEFO 배분 결과를 날짜 카드로: "2026-09-10에서 15개, 2027-01-20에서 5개"</li>
+  <li><b>풀필먼트 반영</b> — 수량만 찍지만 <b>어느 기한에서 빠지는지</b>가 회색 글씨로 따라붙음</li>
+  <li><b>팝업 정산</b> — 반출 로트의 기한이 표시되어, 돌아온 물건의 기한이 보존됨</li>
+  <li><b>유통기한 탭</b> — 임박·만료만 모아 날짜순. 만료는 "자동으로 빠지지 않습니다" 문구와 폐기 버튼</li>
+  </ul><b style="margin-top:18px">거점(위치)은 이렇게 드러냈다</b>
+  <li><b>로트 = 거점 × 유통기한.</b> 같은 날짜라도 창고가 다르면 다른 줄이다 — 상세 카드 안에 <b>📍거점별 수량</b>을 명시</li>
+  <li><b>입고·출고 상단에 거점 선택칩</b>. 기본은 자사창고이고, 풀필먼트 직입고도 여기서 바꾼다</li>
+  <li><b>출고는 선택한 거점 안에서만</b> FEFO가 돈다 — 자사창고에서 빼는데 풀필A 재고를 제안하면 안 된다</li>
+  <li><b>홈 목록의 임박 줄</b>에도 어느 거점인지 붙였다 (풀필A 30개)</li>
+  <li><b>상품 상세에 유통기한순 / 거점순 토글</b> — "언제 만료되나"와 "어디 있나"는 다른 질문이다</li>
+  <div class="pal">
+    <div style="background:#5b21b6">#5B21B6 기본</div>
+    <div style="background:#7c3aed">#7C3AED 그라디언트</div>
+    <div style="background:#b45309">#B45309 임박</div>
+    <div style="background:#b91c1c">#B91C1C 만료</div>
+    <div style="background:#0f7b45">#0F7B45 정상</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

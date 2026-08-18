@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────
+   디자인 토큰 — docs/05-design.md 2절
+   ───────────────────────────────────────────── */
+@theme {
+  --color-acc: #5b21b6;
+  --color-acc-2: #7c3aed;
+  --color-acc-soft: #f4f0fd;
+  --color-acc-line: #e2d9f5;
+
+  --color-ink: #221d33;
+  --color-sub: #8b859c;
+  --color-line: #eeeaf5;
+  --color-dim: #faf9fc;
+
+  --color-amber: #b45309;
+  --color-amber-bg: #fff6e9;
+  --color-red: #b91c1c;
+  --color-red-bg: #fdecec;
+  --color-ok: #0f7b45;
+  --color-ok-bg: #eef7f1;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
+    "Noto Sans KR", sans-serif;
+}
+
+html,
+body {
+  background: #fff;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 수량·날짜는 자릿수가 흔들리면 비교가 안 된다 */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 홈 헤더 그라디언트 */
+.acc-grad {
+  background: linear-gradient(160deg, var(--color-acc-2), var(--color-acc));
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  filter: invert(1);
+}

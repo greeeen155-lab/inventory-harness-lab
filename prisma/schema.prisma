@@ -1,0 +1,175 @@
+// 재고관리 PoC — 데이터 모델
+// 핵심 규칙: 재고의 최소 단위(로트) = 상품 × 거점 × 유통기한
+//            모든 수량 변화는 Movement(어디 → 어디)로만 기록된다.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ───────────────────────── 사용자
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         String     @default("MEMBER") // MEMBER | ADMIN
+  createdAt    DateTime   @default(now())
+
+  movements        Movement[]
+  transfersSent    Transfer[] @relation("TransferSentBy")
+  transfersReceived Transfer[] @relation("TransferReceivedBy")
+}
+
+// ───────────────────────── 상품
+model Product {
+  id              Int      @id @default(autoincrement())
+  sku             String   @unique
+  name            String
+  unit            String   @default("개")
+  expiryAlertDays Int      @default(60) // 품목마다 다른 유통기한 경고 기준일
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  lots          Lot[]
+  movements     Movement[]
+  transferLines TransferLine[]
+  popupPlans    PopupPlan[]
+}
+
+// ───────────────────────── 거점
+// type: OWN(자사창고) | FULFILLMENT(풀필먼트) | POPUP(팝업) | TRANSIT(배송 중) | DISPOSAL(폐기)
+model Location {
+  id              Int       @id @default(autoincrement())
+  name            String
+  type            String
+  isActive        Boolean   @default(true)
+  lastReflectedAt DateTime? // 풀필먼트 마지막 반영일 = 이 거점 숫자의 신뢰도
+  createdAt       DateTime  @default(now())
+
+  lots              Lot[]
+  movementsFrom     Movement[] @relation("MovementFrom")
+  movementsTo       Movement[] @relation("MovementTo")
+  transfersFrom     Transfer[] @relation("TransferFrom")
+  transfersTo       Transfer[] @relation("TransferTo")
+  popup             Popup?     @relation("PopupLocation")
+  popupsAsSource    Popup[]    @relation("PopupSource")
+}
+
+// ───────────────────────── 로트 = 재고의 최소 단위
+model Lot {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  locationId Int
+  expiryDate DateTime
+  quantity   Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  product  Product  @relation(fields: [productId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@unique([productId, locationId, expiryDate]) // ★ 로트의 정의
+  @@index([locationId, expiryDate]) // FEFO 조회용
+}
+
+// ───────────────────────── 이동 원장 — 이력의 진실
+// type:   INBOUND | OUTBOUND | TRANSFER | POPUP_OUT | POPUP_IN | ADJUST | DISPOSE
+// reason: SALE | SAMPLE | DAMAGE | LOSS | DISPOSE | PURCHASE | RETURN | COUNT_DIFF | INPUT_ERROR | OTHER
+//         (위치 이동에는 reason이 없다 = null)
+model Movement {
+  id             Int      @id @default(autoincrement())
+  type           String
+  reason         String?
+  note           String?
+  productId      Int
+  expiryDate     DateTime
+  quantity       Int // 항상 양수. 방향은 from/to로 표현한다
+  fromLocationId Int? // null = 외부에서 들어옴
+  toLocationId   Int? // null = 외부로 나감
+  transferId     Int?
+  popupId        Int?
+  reversalOfId   Int? // 상쇄(취소) 기록이 가리키는 원본
+  userId         Int
+  createdAt      DateTime @default(now())
+
+  product      Product   @relation(fields: [productId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  fromLocation Location? @relation("MovementFrom", fields: [fromLocationId], references: [id])
+  toLocation   Location? @relation("MovementTo", fields: [toLocationId], references: [id])
+  transfer     Transfer? @relation(fields: [transferId], references: [id])
+  popup        Popup?    @relation(fields: [popupId], references: [id])
+  reversalOf   Movement? @relation("Reversal", fields: [reversalOfId], references: [id])
+  reversedBy   Movement[] @relation("Reversal")
+
+  @@index([createdAt])
+  @@index([productId, createdAt])
+}
+
+// ───────────────────────── 거점 간 이동 (발송 → 도착 확인)
+// status: SENT | RECEIVED | CANCELLED
+model Transfer {
+  id             Int       @id @default(autoincrement())
+  fromLocationId Int
+  toLocationId   Int
+  status         String    @default("SENT")
+  note           String?
+  sentAt         DateTime  @default(now())
+  receivedAt     DateTime?
+  sentById       Int
+  receivedById   Int?
+
+  fromLocation Location       @relation("TransferFrom", fields: [fromLocationId], references: [id])
+  toLocation   Location       @relation("TransferTo", fields: [toLocationId], references: [id])
+  sentBy       User           @relation("TransferSentBy", fields: [sentById], references: [id])
+  receivedBy   User?          @relation("TransferReceivedBy", fields: [receivedById], references: [id])
+  lines        TransferLine[]
+  movements    Movement[]
+}
+
+model TransferLine {
+  id          Int      @id @default(autoincrement())
+  transferId  Int
+  productId   Int
+  expiryDate  DateTime
+  sentQty     Int
+  receivedQty Int? // 도착 시 실제 수량. 다르면 차이는 조정 기록으로 남는다
+
+  transfer Transfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+// ───────────────────────── 팝업 = 여러 번 반출되고 마지막에 정산되는 임시 거점
+// status: PREP | ACTIVE | SETTLING | CLOSED
+model Popup {
+  id               Int      @id @default(autoincrement())
+  name             String
+  status           String   @default("PREP")
+  startDate        DateTime
+  endDate          DateTime
+  locationId       Int      @unique // 이 팝업 전용 거점
+  sourceLocationId Int // 보통 자사창고
+  settledAt        DateTime?
+  createdAt        DateTime @default(now())
+
+  location       Location    @relation("PopupLocation", fields: [locationId], references: [id])
+  sourceLocation Location    @relation("PopupSource", fields: [sourceLocationId], references: [id])
+  planLines      PopupPlan[]
+  movements      Movement[]
+}
+
+// 반출서 = 계획. 재고를 움직이지 않는다.
+model PopupPlan {
+  id         Int @id @default(autoincrement())
+  popupId    Int
+  productId  Int
+  plannedQty Int
+
+  popup   Popup   @relation(fields: [popupId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([popupId, productId])
+}
