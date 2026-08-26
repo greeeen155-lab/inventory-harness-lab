@@ -84,7 +84,7 @@ async function main() {
   const transit = await db.location.create({ data: { name: '배송 중', type: LOCATION_TYPES.TRANSIT } })
   await db.location.create({ data: { name: '폐기', type: LOCATION_TYPES.DISPOSAL } })
 
-  // ───────── 상품 8종
+  // ───────── 상품 12종
   const P = await Promise.all(
     (
       [
@@ -96,12 +96,29 @@ async function main() {
         ['DOG-SALMON-80', '연어 트릿 80g', 45],
         ['DOG-BEEF-120', '소고기 육포 120g', 60],
         ['DOG-CHICKSTICK-10', '치킨 스틱 10p', 30],
+        ['VEGAN-COOKIE-STRAWBERRY-40', '비건쿠키 딸기 40g', 60],
+        ['VEGAN-COOKIE-CARROT-40', '비건쿠키 당근 40g', 60],
+        ['VEGAN-COOKIE-BLUEBERRY-40', '비건쿠키 블루베리 40g', 60],
+        ['VEGAN-COOKIE-SWEETPOTATO-40', '비건쿠키 고구마 40g', 60],
       ] as [string, string, number][]
     ).map(([sku, name, alert]) =>
       db.product.create({ data: { sku, name, expiryAlertDays: alert } })
     )
   )
-  const [cheese, milkgum, duckneck, jerky, sweetpotato, salmon, beef, chickstick] = P
+  const [
+    cheese,
+    milkgum,
+    duckneck,
+    jerky,
+    sweetpotato,
+    salmon,
+    beef,
+    chickstick,
+    veganStrawberry,
+    veganCarrot,
+    veganBlueberry,
+    veganSweetpotato,
+  ] = P
 
   // ───────── 헬퍼 — 전부 applyMovement / allocateLots를 통과한다
   type Tx = Parameters<Parameters<typeof db.$transaction>[0]>[0]
@@ -245,6 +262,10 @@ async function main() {
   // ════════════════ 시간 순서대로 ════════════════
 
   console.log('▸ 95일 전 — 초기 입고')
+  await inbound(veganStrawberry, d(180), 80, 95)
+  await inbound(veganCarrot, d(180), 80, 95)
+  await inbound(veganBlueberry, d(180), 80, 95)
+  await inbound(veganSweetpotato, d(180), 80, 95)
   await inbound(cheese, d(23), 90, 95) // 당시 118일 → 넉넉했다. 지금은 임박
   await inbound(milkgum, d(155), 200, 95)
   await inbound(duckneck, d(-8), 26, 95) // 당시 87일 → 정상. 지금은 만료
