@@ -19,6 +19,7 @@ for (const file of files) {
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 execFileSync(npm, ['run', 'db:ensure'], {
   stdio: 'inherit',
+  shell: process.platform === 'win32',
   env: { ...process.env, DATABASE_URL: url },
 })
 console.log('\n▸ 검증용 데이터베이스 준비 완료\n')
