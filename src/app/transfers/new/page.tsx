@@ -1,10 +1,12 @@
 import { TransferForm } from '@/components/TransferForm'
 import { db } from '@/lib/db'
 import { LOCATION_TYPES } from '@/lib/constants'
+import { today } from '@/lib/date'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewTransferPage() {
+  const now = today()
   const [products, own, dest, lots] = await Promise.all([
     db.product.findMany({
       where: { isActive: true },
@@ -39,6 +41,7 @@ export default async function NewTransferPage() {
         quantity: l.quantity,
         alertDays: l.product.expiryAlertDays,
       }))}
+      today={now.toISOString()}
     />
   )
 }
