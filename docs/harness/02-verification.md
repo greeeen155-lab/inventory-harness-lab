@@ -44,9 +44,10 @@ Protected 검사 구현은 [`scripts/protected-check.ts`](../../scripts/protecte
 
 현재 보호 경로:
 
-- `docs/harness/00-ssot.md`
 - `AGENTS.md`
 - `CLAUDE.md`
+
+`docs/harness/00-ssot.md` 자체는 사람이 명시적으로 SSOT 정책 갱신을 요청할 수 있으므로 보호 경로에서 제외한다.
 
 보호 경로가 변경되었는데 사람의 승인이 없으면 검증은 `NEEDS_HUMAN` 상태로 실패한다. AI가 자체 판단으로 승인을 대신하지 않는다.
 
@@ -173,4 +174,4 @@ PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교�
 - 구현 구조와 재고 변경 경로는 [docs/06-architecture.md](../06-architecture.md)를 따른다.
 - 보호 경로와 원본 간 충돌 정책은 [00-ssot.md](./00-ssot.md)를 따른다.
 - 이 문서는 검증 실행 방법을 설명하며 요구사항·아키텍처의 내용을 대체하지 않는다.
-- 검증 규칙의 변경은 `scripts/verify/`를 검증 원본으로 삼는 SSOT 선언과 일치해야 한다.
+- 검증 규칙의 변경은 이 문서(`docs/harness/02-verification.md`)를 검증 원본으로 삼는 SSOT 선언과 일치해야 한다.
