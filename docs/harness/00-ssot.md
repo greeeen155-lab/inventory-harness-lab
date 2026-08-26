@@ -121,12 +121,13 @@
 다음 경로는 SSOT 보호 대상이다.
 
 <!-- protected-paths:start -->
-- `docs/harness/00-ssot.md`
 - `AGENTS.md`
 - `CLAUDE.md`
 <!-- protected-paths:end -->
 
-보호 경로가 변경되면 `scripts/protected-check.ts`가 변경을 감지한다. 사람이 해당 변경을 승인한 경우에만 로컬과 CI에서 검증을 통과할 수 있다.
+`docs/harness/00-ssot.md` 자체는 사람이 명시적으로 요청한 SSOT 정책 변경을 반영하는 관리 문서이므로 보호 경로 검사 대상에서 제외한다. SSOT 변경은 이 문서의 충돌 처리 정책과 사람의 요청 범위에 따라 처리한다.
+
+그 외 보호 경로가 변경되면 `scripts/protected-check.ts`가 변경을 감지한다. 사람이 해당 변경을 승인한 경우에만 로컬과 CI에서 검증을 통과할 수 있다.
 
 ### 8.1 승인 방법
 
