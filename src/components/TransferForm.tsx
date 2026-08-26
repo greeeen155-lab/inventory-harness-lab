@@ -18,11 +18,13 @@ export function TransferForm({
   ownLocations,
   destinations,
   lots,
+  today,
 }: {
   products: PickProduct[]
   ownLocations: { id: number; name: string }[]
   destinations: { id: number; name: string }[]
   lots: OutLot[]
+  today: string
 }) {
   const router = useRouter()
   const [fromId, setFromId] = useState(String(ownLocations[0]?.id ?? ''))
@@ -97,7 +99,7 @@ export function TransferForm({
                 {previewOf(current.id, Number(qty)).map((a) => {
                   const lot = lots.find((l) => l.id === a.lotId)!
                   const days = Math.round(
-                    (new Date(a.expiryDate).getTime() - Date.now()) / 86_400_000
+                    (new Date(a.expiryDate).getTime() - new Date(today).getTime()) / 86_400_000
                   )
                   const risky = days <= lot.alertDays
                   return (
