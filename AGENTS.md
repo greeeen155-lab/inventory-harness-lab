@@ -21,6 +21,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | 아키텍처·기술 선택·코드 구조·데이터 흐름 | `docs/06-architecture.md` |
 | UI/UX·컴포넌트·반응형·접근성 | `docs/05-design.md` |
 | 개별 작업의 범위·수용조건·상태 | 해당 GitHub Issue. 원본 연결 규칙은 `docs/harness/00-ssot.md`를 따른다. |
+| 검증 실행·판정 기준 | `docs/harness/02-verification.md` |
+| 구현·검증 반복·재개 절차 | `docs/harness/03-loop.md` |
 | 검증 기준·QA 계획 | `docs/07-plan.md` |
 | 현재 구현 상태·인수인계 | `docs/HANDOVER.md` (현재 상태가 필요한 경우에만) |
 
