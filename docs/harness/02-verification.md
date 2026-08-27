@@ -48,6 +48,18 @@ Protected
 → Build
 ```
 
+단계별 실행 명령과 목적은 다음과 같다.
+
+| 단계 | 실행 명령 | 목적 |
+|---|---|---|
+| Protected | `npm run protected:check` | SSOT 보호 경로의 승인되지 않은 변경 차단 |
+| Prepare | `npm run prepare:verify` | 검증용 DB를 초기화하고 마이그레이션·시드로 기준 상태 준비 |
+| Types | `npm run typecheck` | TypeScript 오류 검사 |
+| Lint | `npm run lint` | ESLint 및 Next.js 규칙 검사 |
+| Architecture Check | `npm run architecture:check` | 아키텍처가 정한 재고 변경 경로 준수 검사 |
+| Test | `npm test` | 자동 테스트와 도메인 불변식 검사 |
+| Build | `npm run build` | Prisma 생성 및 Next.js 프로덕션 빌드 검사 |
+
 이 문서에서 `검증 결과`는 위 실행의 한 번의 결과만 의미한다.
 재시도 여부와 attempt 예산은 이 문서에서 판정하지 않는다.
 
@@ -103,25 +115,7 @@ Protected
 기록 항목이 아니다. 이 값과 검증 판정 이후의 lifecycle은
 [03-loop.md](./03-loop.md)가 관리한다.
 
-## 5. 검증 진입점
-
-모든 검증은 다음 명령으로 실행한다.
-
-```bash
-npm run verify
-```
-
-검증은 아래 순서로 실행되며, 앞 단계가 실패하면 다음 단계로 진행하지 않는다.
-
-```text
-Protected
-→ Prepare
-→ Types
-→ Lint
-→ Architecture Check
-→ Test
-→ Build
-```
+## 5. 단계별 실행 명령
 
 검증 오케스트레이션은 `package.json`의 `verify` 스크립트가 담당한다. 각 단계의 세부 실행 명령은 다음과 같다.
 
