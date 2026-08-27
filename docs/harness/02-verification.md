@@ -150,6 +150,11 @@ CI는 다음 환경에서 실행한다.
 - Node.js 20
 - `npm ci`
 - 전체 Git 이력 checkout
+- `DATABASE_URL=file:./prisma/verify.db` (Prepare와 이후 테스트가 같은 검증 DB 사용)
+
+CI의 `prepare:verify`는 `prisma/verify.db`를 migration·seed하고, job 환경의 동일한 `DATABASE_URL`이 이후 `npm test`와 build에도 전달된다. 개발용 `prisma/dev.db`는 CI에서 사용하거나 초기화하지 않는다.
+
+로컬에서 `npm run verify`를 실행할 때는 검증 DB를 명시적으로 사용하려면 `DATABASE_URL=file:./prisma/verify.db npm run verify`를 실행한다.
 
 PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교한다. CI는 Git diff만으로 AI 여부를 추론하지 않으며, provenance가 없는 보호 경로 변경은 사람의 정상적인 commit/push/PR을 오인 차단하지 않도록 통과한다. 신뢰된 AI harness provenance가 전달된 경우에만 명시적 작업 범위 밖의 보호 변경을 `NEEDS_HUMAN`으로 실패시킨다.
 
