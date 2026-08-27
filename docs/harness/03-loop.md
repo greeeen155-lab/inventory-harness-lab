@@ -93,13 +93,35 @@ PR_READY → PR_CREATED → CI_RUNNING
                                              └─ 로컬 재현 실패 → NEEDS_HUMAN
 
 REVIEW_PENDING
-  ├─ 기존 정책과 사람의 결정에 따른 완료 → DONE
-  ├─ 사람의 명시적 수정 요청(기존 Issue 범위 내) + 재작업 승인 → IMPLEMENTING
-  └─ 그 외 수정 필요 또는 판단 불명확 → NEEDS_HUMAN
+  ├─ 명시적 사람 승인 + merge/close 정책 충족 → DONE
+  ├─ unmerged PR CLOSED + 유효한 반려 코멘트 → REVIEW_REJECTED
+  ├─ unmerged PR CLOSED + 반려 코멘트 없음/불완전 → NEEDS_HUMAN
+  └─ 그 외 결정 불명확 → NEEDS_HUMAN
 
-REVIEW_PENDING에서는 사람의 명시적인 수정 요청과 재작업 승인 없이 자동으로
-`IMPLEMENTING`에 진입하지 않는다. Issue 범위·요구사항·검증 기준의 변경이
-필요하면 `NEEDS_HUMAN`으로 중단한다.
+REVIEW_REJECTED
+  ├─ 명시적 재작업/재진입 결정(기존 Issue 범위 내) → RESUMABLE
+  ├─ 명시적 종료 결정 → ABANDONED
+  └─ 범위 변경 또는 결정 불명확 → NEEDS_HUMAN
+
+RESUMABLE
+  ├─ 사람 반려 후 새 구현 사이클 → IMPLEMENTING
+  ├─ 검증 재개 → VERIFYING
+  ├─ PR/CI 처리 재개 → 해당 상태
+  └─ 종료 결정 → ABANDONED
+
+REVIEW_PENDING에서는 사람의 명시적인 승인 또는 재작업/재진입 결정 없이
+자동으로 `DONE`이나 `IMPLEMENTING`에 진입하지 않는다. `OPEN + CI PASS`는
+항상 `REVIEW_PENDING`으로 유지하며, AI는 임의로 Merge·Issue close·다음
+상태 진행을 하지 않는다. Issue 범위·요구사항·검증 기준의 변경이 필요하면
+`NEEDS_HUMAN`으로 중단한다.
+
+PR이 닫혔다는 사실만으로 승인·반려·완료를 추측하지 않는다. merge되지 않은
+PR의 종료에서 유효한 반려 코멘트를 확인할 수 없으면
+`CLOSED_WITHOUT_DECISION → NEEDS_HUMAN`으로 기록한다.
+
+사람 반려는 기존 구현 접근이나 요구 해석이 달라질 수 있는 새 피드백
+사이클이다. 유효한 반려와 명시적 재작업 결정이 모두 있을 때만 기존 PR을
+reopen한 뒤 구현 루프로 재진입한다.
 
 NEEDS_HUMAN
   ↓ 사람의 명시적 결정
@@ -124,7 +146,9 @@ RESUMABLE
 | `PR_CREATED` | 기존 또는 새 PR이 현재 commit을 가리킴 |
 | `CI_RUNNING` | PR의 CI 실행·대기 중 |
 | `CI_FAILURE_TRIAGE` | CI FAIL의 로컬 재현을 확인 중 |
-| `REVIEW_PENDING` | CI PASS 후 사람 review·merge 정책을 기다림. 사람의 명시적 수정 요청과 재작업 승인 없이는 `IMPLEMENTING`으로 이동하지 않음 |
+| `REVIEW_PENDING` | CI PASS 후 사람의 승인·반려 판단을 기다림. `OPEN + CI PASS`에서 AI는 Merge·Issue close·재구현을 하지 않음 |
+| `REVIEW_REJECTED` | unmerged PR이 사람의 유효한 반려 코멘트로 거부되었으며, 명시적 재작업/재진입 결정을 기다림 |
+| `CLOSED_WITHOUT_DECISION` | unmerged PR이 닫혔으나 유효한 승인·반려 결정 근거를 찾지 못한 사건. 즉시 `NEEDS_HUMAN`으로 전환 |
 | `NEEDS_HUMAN` | AI가 추가 판단·수정·우회를 해서는 안 됨 |
 | `RESUMABLE` | 사람의 결정에 따라 재개 가능 |
 | `DONE` | 기존 review/merge/Issue 완료 정책까지 충족해 lifecycle이 끝남 |
@@ -168,8 +192,25 @@ CI FAIL 뒤 로컬 재현만 하는 것은 기존 attempt를 소비하지 않는
 - 없으면 기본값 `3`을 사용한다.
 - AI는 상한을 임의로 늘리거나 세션 변경 후 0으로 초기화하지 않는다.
 - PASS하면 남은 attempt와 관계없이 PR 게이트로 이동한다.
-- FAIL 후 수정 가능하고 잔여 attempt가 있을 때만 다음 attempt를 시작한다.
+- `FAIL` 후 수정 가능하고 잔여 attempt가 있을 때만 다음 attempt를 시작한다.
+- 사람 반려 후 새 구현 사이클에 재진입하는 경우에만 기존 사이클의 사용 attempt를 `0`으로 기록하고, 동일한 `max-loops`를 새 사이클에 적용한다. 이는 이전 기록을 삭제하는 초기화가 아니다.
 - 상한에 도달하면 추가 구현·검증을 하지 않고 `NEEDS_HUMAN`으로 중단한다.
+
+사람 반려에 따른 attempt reset은 세션 재개, PR reopen 자체, CI rerun, 로그 조회,
+동일 SHA 검증 재실행에는 적용하지 않는다. 새 사이클에서 실제 코드 변경을 시작할
+때 첫 회차를 `attempt 1`로 기록하며, 이전 사이클의 attempt와 검증 결과는 append-only로
+보존한다.
+
+예:
+
+```text
+사이클 A: attempt 1 → PASS → CI PASS → REVIEW_PENDING
+→ 유효한 사람 반려 + 재작업 결정 → 기존 사용 attempt 0 기록
+→ 같은 PR reopen → 새 코드 변경 시작 → 사이클 B attempt 1
+```
+
+반려 코멘트 확인·반려 사건 기록·재작업 승인 대기·PR reopen은 attempt를 소비하지
+않는다. 반려 이후에도 새 `max-loops` 상한을 임의로 늘리지 않는다.
 
 예:
 
@@ -301,9 +342,57 @@ CI PASS만으로 다음을 수행하지 않는다.
 - Issue close
 - `DONE` 처리
 
-`REVIEW_PENDING` 이후의 merge·review·Issue close 조건은 저장소의 기존 정책과 사람의 결정에 따른다.
+`REVIEW_PENDING` 이후의 merge·review·Issue close 조건은 저장소의 기존 정책과 사람의 결정에 따른다. `OPEN + CI PASS`는 사람의 판단을 기다리는 상태이므로 AI가 임의로 Merge하거나 다음 상태로 진행하지 않는다.
 
-### 7.2 CI `FAIL` 사전 기록
+### 7.2 사람 승인·반려와 PR 종료
+
+사람의 승인·반려는 PR 코멘트를 원본으로 기록한다. 자유문을 AI가 추측해
+판정하지 않으며, 반려 코멘트는 다음 고정 헤더를 모두 포함해야 한다.
+
+```text
+반려 사유: <구체적인 사유>
+걸린 종료 조건: <충족하지 못한 Issue 종료 조건>
+재작업: 요청
+```
+
+`반려 사유:`와 `걸린 종료 조건:` 중 하나라도 없거나 값이 비어 있으면 유효한
+반려 코멘트가 아니다. 해당 코멘트가 없거나 불완전한 상태에서 unmerged PR이
+CLOSED가 되면 `CLOSED_WITHOUT_DECISION → NEEDS_HUMAN`으로 멈춘다. AI는 PR
+제목·diff·다른 코멘트로 반려 사유를 추측하지 않고, 코드를 수정하거나 PR을
+reopen하거나 attempt를 소비하지 않는다.
+
+유효한 반려 코멘트가 확인되어도 자동으로 구현을 시작하지 않는다. 사람의
+명시적인 재작업/재진입 결정이 있을 때만 다음 순서로 진행한다.
+
+```text
+REVIEW_PENDING
+→ unmerged PR CLOSED + 유효한 반려 코멘트
+→ REVIEW_REJECTED
+→ 사람의 재작업/재진입 결정
+→ 기존 PR reopen (새 PR 생성 금지)
+→ 기존 사이클 attempt 사용량 0 기록
+→ RESUMABLE → IMPLEMENTING
+→ 코드 변경 시작 시 새 사이클 attempt 1
+```
+
+사람이 요구한 변경이 Issue 범위·종료 조건·검증 계약을 벗어나면
+`NEEDS_HUMAN`으로 중단한다. 기존 Issue를 조용히 변경하거나 새 PR을 임의로
+만들지 않는다. 기존 PR을 reopen할 수 없는 경우에도 `NEEDS_HUMAN`에서 명시적
+사람 결정을 기다린다.
+
+반려 사유 원문과 그 URL은 PR에 보존한다. 재진입 사실, 기존 PR/반려 코멘트
+URL, attempt 사용량을 `0`으로 기록했다는 사실, 새 사이클의 `max-loops`,
+branch/current SHA와 다음 작업은 Issue 코멘트에 append-only로 남긴다. 반려
+사유 원문을 Issue에 복제하지 않는다.
+
+### 7.3 `DONE`과 승인 근거
+
+`DONE`은 로컬/CI 검증 통과만으로 결정하지 않는다. 최종 대상 SHA에 대한 명시적
+사람 승인과 기존 merge·Issue close 정책이 모두 충족되어야 한다. CI PASS,
+PR close, Issue close만으로 승인이나 `DONE`을 추측하지 않는다. 새 SHA가
+생기면 이전 승인·반려는 새 결과에 자동으로 적용되지 않는다.
+
+### 7.4 CI `FAIL` 사전 기록
 
 CI FAIL이 발생하면 바로 코드를 수정하지 않는다. 먼저 다음을 기록한다.
 
@@ -332,7 +421,7 @@ CI FAIL
 
 재현 확인 자체는 attempt를 소비하지 않는다. CI 검증 SHA와 현재 local SHA가 다르면 SHA 차이와 재현 기준을 durable 기록에 남긴다.
 
-### 7.3 CI FAIL + 동일 SHA에서 로컬 재현 성공
+### 7.5 CI FAIL + 동일 SHA에서 로컬 재현 성공
 
 ```text
 CI FAIL
@@ -364,7 +453,7 @@ CI FAIL
 - 기존 PR에 새 commit을 반영하고 CI를 다시 실행한다.
 - CI 때문에 `max-loops`를 증가·초기화하지 않는다.
 
-### 7.4 CI FAIL + 로컬 재현 실패
+### 7.6 CI FAIL + 로컬 재현 실패
 
 ```text
 CI FAIL
@@ -409,6 +498,9 @@ CI rerun이 필요하면 사람의 명시적인 결정 이후에만 수행한다
 - PR URL과 PR 대상 SHA
 - CI run URL과 상태
 - 완료 코멘트 URL·작성 여부
+- PR 상태와 마지막 대상 SHA
+- 반려 코멘트 URL·고정 헤더 검증 결과
+- 재진입·attempt reset·PR reopen 기록
 - 미해결 `NEEDS_HUMAN` 결정
 - 다음 작업
 
@@ -433,7 +525,9 @@ attempt·PR·CI 기록은 기존 기록을 덮어쓰지 않는 append-only 방�
 | Completion | 완료 코멘트 URL·시각·작성 주체·대상 SHA |
 | PR | PR URL, 생성/갱신 시점, 대상 SHA |
 | CI | CI run URL, 대상 SHA, job/step, 결과, 로그 위치 |
+| Review | PR 상태 전이, 승인·반려 결정, 반려 코멘트 URL과 고정 헤더 검증 결과, 대상 SHA |
 | Human | 결정 내용, 결정자, 결정 시점 |
+| Re-entry | 기존 PR URL, reopen event, 기존 attempt 사용량 0 기록, 새 사이클 max-loops·다음 작업 |
 
 허용되는 durable 기록 위치는 Issue 댓글, PR 기록, CI 로그/artifact, 전용 상태 저장소다. 채팅 기록만을 유일한 복구 근거로 사용하지 않는다.
 
@@ -459,7 +553,23 @@ attempt·PR·CI 기록은 기존 기록을 덮어쓰지 않는 append-only 방�
 - `REVIEW_PENDING` 상태
 - attempt 수를 변경하지 않았다는 사실
 
-### 10.3 CI FAIL·로컬 재현 성공 보고
+### 10.3 사람 반려·재진입 보고
+
+- Issue URL
+- 기존 PR URL과 PR의 종료 상태
+- 반려 코멘트 URL (원문은 PR에만 보존)
+- 고정 헤더 `반려 사유:`·`걸린 종료 조건:` 검증 결과
+- `REVIEW_REJECTED → RESUMABLE → IMPLEMENTING` 전이와 명시적 재작업 결정
+- 기존 사이클 attempt 사용량을 `0`으로 기록했다는 사실
+- 새 사이클 `max-loops`, 다음 attempt `1`, branch/current SHA
+- 같은 PR을 reopen했다는 사실과 새 PR을 만들지 않았다는 사실
+- Issue 코멘트에는 반려 사유 원문을 복제하지 않았다는 사실
+
+반려 코멘트가 없거나 헤더가 누락된 경우에는 위 보고 대신
+`CLOSED_WITHOUT_DECISION → NEEDS_HUMAN` 보고를 작성하며, reopen·코드 변경·attempt
+소비를 하지 않는다.
+
+### 10.4 CI FAIL·로컬 재현 성공 보고
 
 - PR/CI URL
 - 실패 job/step·로그
@@ -469,7 +579,7 @@ attempt·PR·CI 기록은 기존 기록을 덮어쓰지 않는 append-only 방�
 - 기존 PR 유지 여부
 - 다음 attempt ID와 다음 단계
 
-### 10.4 CI FAIL·로컬 재현 실패 보고
+### 10.5 CI FAIL·로컬 재현 실패 보고
 
 - PR/CI URL
 - 실패 job/step·로그
@@ -480,7 +590,7 @@ attempt·PR·CI 기록은 기존 기록을 덮어쓰지 않는 append-only 방�
 - 사람에게 필요한 단일 결정
 - 결정 전 merge·Issue 완료·추가 자동 수정 금지
 
-### 10.5 DONE
+### 10.6 DONE
 
 `DONE`은 다음을 모두 충족하고, 기존 review·merge·Issue close 정책과 사람의 결정이 완료된 경우에만 기록한다.
 
@@ -488,13 +598,14 @@ attempt·PR·CI 기록은 기존 기록을 덮어쓰지 않는 append-only 방�
 - Issue 종료 조건 전부 충족
 - 필요한 수동 조건 확인
 - 완료 코멘트 기록
-- PR CI PASS
+- PR CI PASS (최종 대상 SHA)
+- 최종 대상 SHA에 대한 명시적 사람 승인
 - 필요한 review/merge/Issue close 절차 완료
 - 최종 상태와 근거의 durable 기록 완료
 
 CI PASS만으로 `DONE` 처리하지 않는다.
 
-### 10.6 중단
+### 10.7 중단
 
 `NEEDS_HUMAN` 또는 세션 중단 보고에는 다음을 포함한다.
 
