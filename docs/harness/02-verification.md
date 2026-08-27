@@ -49,16 +49,11 @@ Protected 검사 구현은 [`scripts/protected-check.ts`](../../scripts/protecte
 
 `docs/harness/00-ssot.md` 자체는 사람이 명시적으로 SSOT 정책 갱신을 요청할 수 있으므로 보호 경로에서 제외한다.
 
-보호 경로가 변경되었는데 사람의 승인이 없으면 검증은 `NEEDS_HUMAN` 상태로 실패한다. AI가 자체 판단으로 승인을 대신하지 않는다.
+보호 경로 변경 자체로는 검증을 실패시키지 않는다. Git diff, commit author, PR author만으로는 사람이 직접 수정했는지 AI가 수정했는지 판별할 수 없기 때문이다. `scripts/ai-provenance.ts`가 신뢰된 AI harness provenance를 받은 경우에만 AI 변경으로 분류하고, provenance에 기록된 명시적 exact 경로 범위 밖의 보호 변경을 `NEEDS_HUMAN`으로 차단한다.
 
-사람이 변경 내용을 검토하고 승인한 경우에만 다음 값을 검증 프로세스에 주입한다.
+provenance가 없으면 사람의 직접 수정과 정상적인 commit/push/PR 및 CI workflow를 보존하기 위해 통과한다. 현재 저장소에는 provenance를 생성하는 agent 파일 수정 wrapper가 없으므로, 흔적을 남기지 않은 AI 변경은 자동 검출할 수 없다. `PROTECTED_APPROVED`와 `PROTECTED_APPROVER`는 승인 수단으로 사용하지 않는다.
 
-```text
-PROTECTED_APPROVED=1
-PROTECTED_APPROVER=<승인자 식별자>
-```
-
-이 값은 로컬 셸 또는 CI 작업의 환경 변수로만 전달하며, 저장소 파일·커밋·문서에 기록하지 않는다.
+이 정책은 AI 변경을 완전히 판별하는 보장이 아니라, 신뢰된 harness가 제공한 provenance가 있을 때의 선택적 검사다.
 
 ## 3. Prepare
 
@@ -156,7 +151,7 @@ CI는 다음 환경에서 실행한다.
 - `npm ci`
 - 전체 Git 이력 checkout
 
-PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교한다. 보호 경로 변경 시 CI 환경에는 사람 승인 값이 명시적으로 제공되어야 하며, 승인되지 않은 변경은 실패한다.
+PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교한다. CI는 Git diff만으로 AI 여부를 추론하지 않으며, provenance가 없는 보호 경로 변경은 사람의 정상적인 commit/push/PR을 오인 차단하지 않도록 통과한다. 신뢰된 AI harness provenance가 전달된 경우에만 명시적 작업 범위 밖의 보호 변경을 `NEEDS_HUMAN`으로 실패시킨다.
 
 ## 9.1 로컬과 CI의 차이
 
@@ -166,7 +161,7 @@ PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교�
 | 의존성 설치 | 기존 로컬 의존성 | `npm ci` |
 | 검증 DB | `prisma/verify.db` | 실행 작업의 검증 환경 |
 | Protected 기준 | 작업 트리와 지정 base | PR base SHA 또는 push의 HEAD 기준 |
-| 보호 경로 승인 | 환경 변수로 명시 | Repository Variables로 주입 가능 |
+| 보호 경로 주체 검사 | AI harness provenance가 있을 때만 명시적 exact 범위 검사 | trusted provenance가 있을 때만 검사, 없으면 보호 변경 자체로 실패하지 않음 |
 
 ## 10. 원본과 검증의 경계
 
