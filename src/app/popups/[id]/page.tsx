@@ -18,6 +18,7 @@ export default async function PopupDetailPage({ params }: { params: Promise<{ id
   const { popup, totals, byProduct, popupLots, sourceLots, products } = detail
   const status = popup.status as PopupStatus
   const closed = status === POPUP_STATUS.CLOSED
+  const expired = detail.expired
   const onHand = popupLots.reduce((s, l) => s + l.quantity, 0)
 
   const header = (
@@ -26,9 +27,12 @@ export default async function PopupDetailPage({ params }: { params: Promise<{ id
         <Link href="/popups" className="text-[14.5px] font-extrabold">
           ‹ {popup.name}
         </Link>
-        <Badge tone={closed ? 'gray' : status === POPUP_STATUS.PREP ? 'amber' : 'acc'}>
-          {POPUP_STATUS_LABEL[status]}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge tone={closed ? 'gray' : status === POPUP_STATUS.PREP ? 'amber' : 'acc'}>
+            {POPUP_STATUS_LABEL[status]}
+          </Badge>
+          {expired && <Badge tone="red">기간 만료</Badge>}
+        </div>
       </header>
       <p className="border-b border-line bg-dim px-4 py-2.5 text-[11.5px] text-[#5b5570] tnum">
         {popupPeriod(popup.startDate, popup.endDate)} · {popup.sourceLocation.name}에서 반출

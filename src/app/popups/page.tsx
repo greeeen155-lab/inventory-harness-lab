@@ -51,6 +51,7 @@ export default async function PopupsPage() {
               <Badge tone={TONE[p.status as PopupStatus]}>
                 {POPUP_STATUS_LABEL[p.status as PopupStatus]}
               </Badge>
+              {p.expired && <Badge tone="red">기간 만료</Badge>}
               <span className="text-sub">›</span>
             </div>
           </div>
