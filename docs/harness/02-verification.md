@@ -6,7 +6,104 @@
 > 아키텍처 원본: [../06-architecture.md](../06-architecture.md)
 > 상태: 현재 구현 기준
 
-## 1. 검증 진입점
+## 1. 문서 역할과 책임 경계
+
+이 문서는 **한 번의 검증 실행**을 수행하고 그 결과를 판정하는 원본이다.
+
+> 이번 검증 실행은 통과했는가?
+
+이 문서가 담당하는 범위는 다음과 같다.
+
+- 검증 진입 명령
+- 검증 단계의 실행 순서와 실행 방법
+- 검증 실행 환경
+- 단계별 결과와 종료 코드의 해석
+- 한 번의 실행에 대한 `PASS` / `FAIL` / `NEEDS_HUMAN` 판정
+
+구현 변경, attempt 수와 최대 반복 횟수, 실패 후 재시도, 세션 재개,
+작업 완료·중단 lifecycle은 [03-loop.md](./03-loop.md)의 원본이다.
+이 문서는 검증 판정 후의 다음 행동을 결정하지 않는다.
+
+## 2. 한 번의 검증 실행
+
+한 번의 검증 실행은 이 문서의 진입점에서 시작하여 정의된 단계 순서를
+따르고, 모든 단계의 결과 또는 중단 결과가 확정될 때까지 수행하는 하나의
+검증 실행이다.
+
+검증 실행의 진입점은 다음과 같다.
+
+```bash
+npm run verify
+```
+
+실행 순서는 다음과 같다.
+
+```text
+Protected
+→ Prepare
+→ Types
+→ Lint
+→ Architecture Check
+→ Test
+→ Build
+```
+
+이 문서에서 `검증 결과`는 위 실행의 한 번의 결과만 의미한다.
+재시도 여부와 attempt 예산은 이 문서에서 판정하지 않는다.
+
+## 3. 검증 결과 판정
+
+### 3.1 `PASS`
+
+정의된 모든 필수 검증 단계가 실행되고 성공했으며, 해당 작업의
+기계 검증 기대값을 충족하면 `PASS`다. 필수 단계가 하나라도 실패했거나
+필수 검증 조건을 확인하지 못한 경우 `PASS`로 판정하지 않는다.
+
+### 3.2 `FAIL`
+
+검증 실행이 결과를 확정할 수 있는 상태로 종료되었지만, 구현이 Issue의
+기대 결과 또는 이 문서에 정의된 검증 조건을 충족하지 못하면 `FAIL`이다.
+실패한 단계, 종료 코드, 기대값과 실제 결과를 근거로 기록한다.
+
+### 3.3 `NEEDS_HUMAN`
+
+검증 결과를 AI가 코드 수정만으로 확정하거나 처리해서는 안 되는 경우
+`NEEDS_HUMAN`이다. 예시는 다음과 같다.
+
+- protected 경로에 대한 승인 또는 판단이 필요함
+- Issue·SSOT·검증 기준 사이의 충돌이 있음
+- 수동 확인 결과를 사람이 판단해야 함
+- 환경·인프라 문제 또는 flaky 결과로 성공/실패를 확정할 수 없음
+- 실행이 중단되어 완료 여부를 확인할 수 없음
+
+`NEEDS_HUMAN`은 검증 결과를 임의로 `FAIL`로 바꾸거나 재시도 가능한
+실패로 분류하는 뜻이 아니다.
+
+### 3.4 중단·판정 불가
+
+모든 필수 단계가 끝나기 전에 검증이 중단되고 완료 결과를 복구할
+증거가 없으면 `PASS` 또는 `FAIL`로 판정하지 않는다. 이 경우 최종
+검증 결과는 `NEEDS_HUMAN`으로 기록한다. 실패했다고 검증 단계를 생략해
+성공으로 처리하지 않는다.
+
+## 4. 검증 결과 기록
+
+한 번의 검증 실행 결과에는 다음을 기록한다.
+
+- 실행 명령
+- 실행 시점과 branch/current SHA
+- 검증 환경 식별자
+- 실행된 단계와 단계별 종료 코드
+- 통과·실패한 테스트 수
+- 실패 단계와 오류 출력
+- 최종 판정: `PASS`, `FAIL`, `NEEDS_HUMAN`
+- 전체 출력 또는 로그 위치
+
+`attempt ID`, `max-loops`, 사용·잔여 attempt, 다음 구현 변경은 이 문서의
+기록 항목이 아니다. 이 값과 검증 판정 이후의 lifecycle은
+[03-loop.md](./03-loop.md)가 관리한다.
+
+## 5. 검증 진입점
 
 모든 검증은 다음 명령으로 실행한다.
 
@@ -38,7 +135,7 @@ Protected
 | Test | `npm test` | 자동 테스트와 도메인 불변식 검사 |
 | Build | `npm run build` | Prisma 생성 및 Next.js 프로덕션 빌드 검사 |
 
-## 2. Protected
+## 6. Protected
 
 Protected 검사 구현은 [`scripts/protected-check.ts`](../../scripts/protected-check.ts)다. 보호 경로 목록은 [00-ssot.md](./00-ssot.md)의 `protected-paths` 블록에서 관리한다.
 
@@ -55,7 +152,7 @@ provenance가 없으면 사람의 직접 수정과 정상적인 commit/push/PR �
 
 이 정책은 AI 변경을 완전히 판별하는 보장이 아니라, 신뢰된 harness가 제공한 provenance가 있을 때의 선택적 검사다.
 
-## 3. Prepare
+## 7. Prepare
 
 Prepare 구현은 [`scripts/prepare-verify.ts`](../../scripts/prepare-verify.ts)다.
 
@@ -67,9 +164,9 @@ Prepare 구현은 [`scripts/prepare-verify.ts`](../../scripts/prepare-verify.ts)
 
 검증 DB를 별도로 사용하므로 로컬 개발 DB의 수동 변경이 검증 결과에 영향을 주지 않는다. Prepare는 검증 DB를 파괴적으로 초기화하므로, 실행 중인 검증 DB를 보존해야 하는 경우에는 실행하지 않는다.
 
-## 4. Types와 Lint
+## 8. Types와 Lint
 
-### 4.1 Types
+### 8.1 Types
 
 ```bash
 npm run typecheck
@@ -83,7 +180,7 @@ npx tsc --noEmit
 
 `tsconfig.json`의 strict TypeScript 설정과 Next.js 타입 정보를 기준으로 검사한다.
 
-### 4.2 Lint
+### 8.2 Lint
 
 ```bash
 npm run lint
@@ -91,7 +188,7 @@ npm run lint
 
 ESLint의 Next.js Core Web Vitals 및 TypeScript 설정을 사용한다. 렌더링 중 실행하면 안 되는 side effect와 프로젝트 코드 스타일 위반 등을 검사한다.
 
-## 5. Architecture Check
+## 9. Architecture Check
 
 검사 구현은 [`scripts/architecture-check.ts`](../../scripts/architecture-check.ts)다. 기준은 [docs/06-architecture.md](../06-architecture.md)의 재고 변경 단일 경로 규칙이다.
 
@@ -109,7 +206,7 @@ npm run architecture:check
 
 재고 수량 변경은 `applyMovement()`를 통해야 하며, 취소는 `reverseMovement()`가 만드는 상쇄 기록을 사용한다. 직접 mutation이 발견되면 파일·행·열을 출력하고 실패한다.
 
-## 6. Test
+## 10. Test
 
 ```bash
 npm test
@@ -123,7 +220,7 @@ npm test
 | `tests/stock-invariant.test.ts` | 재고 부족 롤백, 내부 이동 총량 불변, 취소 후 복원 |
 | `tests/popup-settle.test.ts` | 누적 팝업 정산, 시식 초과 거부, 정산 되돌리기 |
 
-## 7. Build
+## 11. Build
 
 ```bash
 npm run build
@@ -135,7 +232,7 @@ Prisma Client를 생성한 뒤 Next.js 프로덕션 빌드를 실행한다.
 prisma generate → next build
 ```
 
-## 8. CI 검증
+## 12. CI 검증
 
 GitHub Actions workflow는 [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml)이다.
 
@@ -158,7 +255,7 @@ CI의 `prepare:verify`는 `prisma/verify.db`를 migration·seed하고, job 환�
 
 PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교한다. CI는 Git diff만으로 AI 여부를 추론하지 않으며, provenance가 없는 보호 경로 변경은 사람의 정상적인 commit/push/PR을 오인 차단하지 않도록 통과한다. 신뢰된 AI harness provenance가 전달된 경우에만 명시적 작업 범위 밖의 보호 변경을 `NEEDS_HUMAN`으로 실패시킨다.
 
-## 9.1 로컬과 CI의 차이
+## 13.1 로컬과 CI의 차이
 
 | 항목 | 로컬 | CI |
 |---|---|---|
@@ -168,7 +265,7 @@ PR에서는 base commit을 Protected 검사에 전달해 PR 변경분을 비교�
 | Protected 기준 | 작업 트리와 지정 base | PR base SHA 또는 push의 HEAD 기준 |
 | 보호 경로 주체 검사 | AI harness provenance가 있을 때만 명시적 exact 범위 검사 | trusted provenance가 있을 때만 검사, 없으면 보호 변경 자체로 실패하지 않음 |
 
-## 10. 원본과 검증의 경계
+## 14. 원본과 검증의 경계
 
 - 제품 요구사항과 도메인 규칙은 [docs/01-requirements.md](../01-requirements.md)를 따른다.
 - 구현 구조와 재고 변경 경로는 [docs/06-architecture.md](../06-architecture.md)를 따른다.
