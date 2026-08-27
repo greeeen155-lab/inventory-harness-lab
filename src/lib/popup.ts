@@ -2,7 +2,7 @@ import type { Prisma } from '@/generated/prisma/client'
 import { db } from './db'
 import { applyMovement, reverseMovement } from './stock'
 import { MOVEMENT_TYPES, POPUP_STATUS, REASON_CODES } from './constants'
-import { dateOnly } from './date'
+import { dateOnly, today } from './date'
 
 /**
  * 팝업 = 여러 번 재고가 들어갔다가 마지막에 한 번 정산되는 임시 거점.
@@ -59,6 +59,7 @@ export async function getPopupList() {
     status: p.status,
     startDate: p.startDate,
     endDate: p.endDate,
+    expired: isPopupExpired(p.endDate),
     onHand: p.location.lots.reduce((s, l) => s + l.quantity, 0),
     ...tallyPopup(p.movements, p.locationId),
   }))
@@ -134,6 +135,7 @@ export async function getPopupDetail(popupId: number) {
 
   return {
     popup,
+    expired: isPopupExpired(popup.endDate),
     totals,
     byProduct: [...byProduct.values()].sort((a, b) => b.shipped - a.shipped || a.name.localeCompare(b.name, 'ko')),
     /** 정산 입력 대상 — 팝업에 남아 있는 로트 (유통기한을 보존해야 복귀 로트가 맞는다) */
@@ -328,6 +330,11 @@ export async function unsettlePopupTx(
   await tx.location.update({ where: { id: popup.locationId }, data: { isActive: true } })
 
   return settlement.length
+}
+
+/** 종료일 다음 날부터 팝업은 만료된 것으로 본다 (종료일 포함). */
+export function isPopupExpired(endDate: Date | string, asOf: Date | string = today()): boolean {
+  return dateOnly(endDate).getTime() < dateOnly(asOf).getTime()
 }
 
 /** 팝업 기간 문구 */
