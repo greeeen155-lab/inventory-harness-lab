@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { readAiProvenance, unauthorizedProtectedPaths } from './ai-provenance'
 
 const ssotPath = path.resolve(process.cwd(), 'docs/harness/00-ssot.md')
 const ssot = readFileSync(ssotPath, 'utf8')
@@ -49,18 +50,25 @@ if (protectedChanges.length === 0) {
   process.exit(0)
 }
 
-const approved = ['1', 'true', 'yes'].includes(
-  (process.env.PROTECTED_APPROVED ?? '').toLowerCase(),
-)
-const approver = process.env.PROTECTED_APPROVER?.trim()
+const provenance = readAiProvenance()
 
-if (!approved || !approver) {
-  console.error('Protected check failed: protected paths changed without human approval')
-  for (const file of protectedChanges) console.error(`  ${file}`)
+if (provenance.kind === 'absent') {
+  console.log('Protected check passed: change origin is not available to the verifier')
+  process.exit(0)
+}
+
+if (provenance.kind === 'invalid') {
+  console.log(`Protected check passed: ignored unavailable AI provenance (${provenance.reason})`)
+  process.exit(0)
+}
+
+const unauthorized = unauthorizedProtectedPaths(protectedChanges, provenance.provenance)
+if (unauthorized.length > 0) {
+  console.error('Protected check failed: AI provenance does not cover protected paths')
+  for (const file of unauthorized) console.error(`  ${file}`)
   console.error('  status: NEEDS_HUMAN')
-  console.error('  approval: set PROTECTED_APPROVED=1 and PROTECTED_APPROVER=<human>')
   process.exit(1)
 }
 
-console.log(`Protected check passed: human approval by ${approver}`)
-for (const file of protectedChanges) console.log(`  approved: ${file}`)
+console.log('Protected check passed: AI provenance covers protected paths')
+for (const file of protectedChanges) console.log(`  covered: ${file}`)

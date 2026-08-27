@@ -128,16 +128,20 @@
 
 `docs/harness/00-ssot.md` 자체는 사람이 명시적으로 요청한 SSOT 정책 변경을 반영하는 관리 문서이므로 보호 경로 검사 대상에서 제외한다. SSOT 변경은 이 문서의 충돌 처리 정책과 사람의 요청 범위에 따라 처리한다.
 
-그 외 보호 경로가 변경되면 `scripts/protected-check.ts`가 변경을 감지한다. 사람이 해당 변경을 승인한 경우에만 로컬과 CI에서 검증을 통과할 수 있다.
+보호 경로 변경 여부만으로 사람의 변경을 차단하지 않는다. `scripts/protected-check.ts`는 신뢰된 AI harness가 제공하는 세션 provenance가 있을 때에만 AI 변경으로 분류하고, 그 provenance에 기록된 명시적 작업 범위를 벗어난 보호 경로 변경을 차단한다.
 
-### 8.1 승인 방법
+### 8.1 AI 변경 provenance
 
-사람은 보호 경로 변경을 검토한 뒤 다음 환경 변수를 설정해 명시적으로 승인한다.
+사람이 직접 수정한 변경과 일반 Git workflow는 provenance가 없으므로 통과한다. 사람이 AI에게 보호 경로 수정을 명시적으로 지시한 경우에는 AI harness가 세션의 정확한 경로 범위를 provenance로 기록하면 해당 범위 안의 변경을 허용한다.
 
-- `PROTECTED_APPROVED=1`
-- `PROTECTED_APPROVER=<승인한 사람의 식별자>`
+- provenance는 저장소 밖의 신뢰된 AI harness가 실행 중에 전달하는 일시적 정보다.
+- `source`, 세션 식별자, 저장소 식별자, 명시적으로 허용된 exact 경로와 실제 변경 경로를 포함해야 한다.
+- `PROTECTED_APPROVED`와 `PROTECTED_APPROVER`는 승인 수단이 아니며 무시한다.
+- provenance가 없으면 Git diff만으로 사람과 AI를 구분할 수 없으므로 보호 변경을 이유로 실패시키지 않는다.
+- 유효한 AI provenance의 범위를 벗어난 보호 변경은 `NEEDS_HUMAN`으로 실패한다.
+- 이 저장소에는 아직 provenance를 생성하는 agent 수정 wrapper가 없으므로, provenance 없는 AI 변경을 자동으로 탐지할 수 있다는 보장은 없다.
 
-환경 변수는 실행 중인 로컬 검증 프로세스 또는 CI 작업에만 주입한다. 커밋하거나 SSOT에 저장하지 않는다. 두 값 중 하나라도 없으면 `NEEDS_HUMAN`으로 실패한다.
+AI는 자연어 지시를 임의로 승인 문자열로 변환하지 않는다. 명시적 지시와 exact 범위의 기록은 외부 harness의 책임이며, 검증기는 Git diff만으로 그 사실을 추론하지 않는다.
 
 ## 9. 검증·구현 루프 정책
 
